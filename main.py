@@ -7,6 +7,7 @@ from mainapp import Ui_MainWindow
 from xml.dom import minidom
 import os
 import shutil
+import datetime
 
 
 class OperoPDS(QtWidgets.QMainWindow):
@@ -15,9 +16,11 @@ class OperoPDS(QtWidgets.QMainWindow):
         super(OperoPDS, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.isASFK = 'D:\\isASFK'
-        self.isPUDS = 'D:\\isPUDS'
+        currentDate = datetime.datetime.now()
+        self.isASFK = 'D:\\isASFK' + '\\' + currentDate.strftime("%Y%m%d")
+        self.isPUDS = 'D:\\isPUDS' + '\\' + currentDate.strftime("%Y%m%d")
         self.inBANK = 'D:\\OEV\\Exg\\cli'
+        self.LOGS = 'D:\\LOGS'
         self.OTVSEND = 'RDI0NCB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI'
         self.OTZVSEND = 'RDI3NSB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI'
         self.PESSEND = 'YWNrZXRFSUQgeG1sbnM9InVybjpjYnItcnU6ZWQ6djIuMCIgRURObz0i'
@@ -34,6 +37,16 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui.ZONDSEND.clicked.connect(lambda: self.sending(self.ZONDSEND))
         self.ui.ZVPSEND.clicked.connect(lambda: self.sending(self.ZVPSEND))
         self.ui.clearWindow.clicked.connect(self.clearWindow)
+        self.chekdirs()
+
+    def chekdirs(self):
+        currentDate = datetime.datetime.now()
+        if not os.path.exists(self.LOGS + '\\' + currentDate.strftime("%Y%m%d") + '\\' + '1'):
+            os.makedirs(self.LOGS + '\\' + currentDate.strftime("%Y%m%d") + '\\' + '1')
+        if not os.path.exists(self.isASFK):
+            os.makedirs(self.isASFK)
+        if not os.path.exists(self.isPUDS):
+            os.makedirs(self.isPUDS)
 
     def clearWindow(self):
         self.ui.textEdit.clear()
