@@ -33,6 +33,10 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui.ZINFSEND.clicked.connect(lambda: self.sending(self.ZINFSEND))
         self.ui.ZONDSEND.clicked.connect(lambda: self.sending(self.ZONDSEND))
         self.ui.ZVPSEND.clicked.connect(lambda: self.sending(self.ZVPSEND))
+        self.ui.clearWindow.clicked.connect(self.clearWindow)
+
+    def clearWindow(self):
+        self.ui.textEdit.clear()
 
     def sending(self, type):
         dirsASFKPUDS = [self.isASFK, self.isPUDS]
