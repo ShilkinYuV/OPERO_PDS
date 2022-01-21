@@ -5,9 +5,12 @@ from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow
 from PyQt6.QtGui import QIcon
 from mainapp import Ui_MainWindow
 from xml.dom import minidom
+from EpdDay import EpdDay
+from EpdNight import EpdNight
 import os
 import shutil
 import datetime
+import logging
 
 
 class OperoPDS(QtWidgets.QMainWindow):
@@ -38,6 +41,9 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui.ZVPSEND.clicked.connect(lambda: self.sending(self.ZVPSEND))
         self.ui.clearWindow.clicked.connect(self.clearWindow)
         self.chekdirs()
+        logging.basicConfig(filename="D:\\LOGS\\" + currentDate.strftime("%Y%m%d") + '\\' + '1\\' + "sample.log", level=logging.INFO)
+        self.epdDay = EpdDay(my_window=self)
+        self.epdNight = EpdNight(my_window=self)
 
     def chekdirs(self):
         currentDate = datetime.datetime.now()
@@ -67,33 +73,39 @@ class OperoPDS(QtWidgets.QMainWindow):
                     self.elementXML = str(elem.firstChild.data)
                     if self.elementXML.__contains__(type):
                         self.ui.textEdit.append('       Начало копирования ' + file + ' в ' + self.inBANK)
+                        logging.info('       Начало копирования ' + file + ' в ' + self.inBANK)
                         isEmpty = False
                         try:
                             shutil.copy2(myFile, self.inBANK + '\\' + file)
-                            self.ui.textEdit.append('Копирование ' + file + ' из ' + currentdirs +' в ' + self.inBANK + ' успешно завершено')
+                            self.ui.textEdit.append('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено')
+                            logging.info('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено')
                         except Exception:
                             self.ui.textEdit.append('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось')
+                            logging.error('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось')
 
                         bankfiles = os.listdir(self.inBANK)
                         for bankfile in bankfiles:
                             if bankfile.__contains__(file):
                                 self.ui.textEdit.append('Файл ' + file + ' присутствует в ' + self.inBANK)
+                                logging.info('Файл ' + file + ' присутствует в ' + self.inBANK)
                                 try:
                                     os.remove(myFile)
                                     self.ui.textEdit.append('Файл ' + file + ' удален из ' + currentdirs)
+                                    logging.info('Файл ' + file + ' удален из ' + currentdirs)
                                 except:
                                     self.ui.textEdit.append('Не удалось удалить ' + file + ' из ' + currentdirs)
+                                    logging.error('Не удалось удалить ' + file + ' из ' + currentdirs)
 
         if isEmpty:
             sender = self.sender()
             self.ui.textEdit.append('Корневые каталоги не содержат файлов ' + sender.text())
+            logging.info('Корневые каталоги не содержат файлов ' + sender.text())
 
     def checkfiles(self):
         dirsASFKPUDS = [self.isASFK, self.isPUDS]
-
+        isEmpty = True
         for currentdirs in dirsASFKPUDS:
             files = os.listdir(currentdirs)
-            print(files)
 
             for file in files:
                 myFile = currentdirs + '\\' + file
@@ -103,26 +115,29 @@ class OperoPDS(QtWidgets.QMainWindow):
                 for elem in items:
                     self.elementXML = str(elem.firstChild.data)
                     if self.elementXML.__contains__(self.OTVSEND):
-                        print('OTVSEND ' + file)
                         self.ui.textEdit.append('OTVSEND ' + file)
+                        isEmpty = False
                     elif self.elementXML.__contains__(self.OTVSEND):
-                        print('OTZVSEND ' + file)
                         self.ui.textEdit.append('OTZVSEND ' + file)
+                        isEmpty = False
                     elif self.elementXML.__contains__(self.PESSEND):
-                        print('PESSEND ' + file)
                         self.ui.textEdit.append('PESSEND ' + file)
+                        isEmpty = False
                     elif self.elementXML.__contains__(self.RNPSEND):
-                        print('RNPSEND ' + file)
                         self.ui.textEdit.append('RNPSEND ' + file)
+                        isEmpty = False
                     elif self.elementXML.__contains__(self.ZINFSEND):
-                        print('ZINFSEND ' + file)
                         self.ui.textEdit.append('ZINFSEND ' + file)
+                        isEmpty = False
                     elif self.elementXML.__contains__(self.ZONDSEND):
-                        print('ZONDSEND ' + file)
                         self.ui.textEdit.append('ZONDSEND ' + file)
+                        isEmpty = False
                     elif self.elementXML.__contains__(self.ZVPSEND):
-                        print('ZVPSEND ' + file)
                         self.ui.textEdit.append('ZVPSEND ' + file)
+                        isEmpty = False
+
+        if isEmpty:
+            self.ui.textEdit.append('Корневые каталоги не содержат файлов')
 
 
 if __name__ == '__main__':
