@@ -19,5 +19,7 @@ class EpdDay:
 
     def go_epd_day(self):
         print('день')
-
-
+        try:
+           os.system('D:\\OEV\\Exg\\rcv\\unb64_rabis.exe *.* D:\\OEV\\Exg\\rcv >> D:\\OEV\\Exg\\rcv\\logs\\decod.log')
+        except Exception:
+            print('Ошибка ебучая')
