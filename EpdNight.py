@@ -22,8 +22,6 @@ class EpdNight:
         self.current_time = datetime.datetime.now()
         self.today = datetime.datetime.now()
         self.tomorrow = self.today + datetime.timedelta(days=1)
-        print(self.today)
-        print(self.tomorrow)
         self.tomorow_morning = self.tomorrow.replace(hour=9, minute=0, second=0, microsecond=0)
         self.evening = datetime.datetime.now().replace(hour=18, minute=0, second=0, microsecond=0)
 
@@ -39,7 +37,6 @@ class NigthCicle(Thread):
 
     def run(self):
         while self.nigth.current_time > self.nigth.evening and self.nigth.current_time < self.nigth.tomorow_morning:
-            print('еще ночь делаю все сам')
             # тут вся движуха будет
             sleep(1800)
 
