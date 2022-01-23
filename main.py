@@ -42,14 +42,14 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui.ZVPSEND.clicked.connect(lambda: self.sending(self.ZVPSEND))
         self.ui.clearWindow.clicked.connect(self.clearWindow)
         self.chekdirs()
-        logging.basicConfig(filename="D:\\LOGS\\" + currentDate.strftime("%Y%m%d") + '\\' + '1\\' + "sample.log", level=logging.INFO)
+        logging.basicConfig(filename="D:\\LOGS\\" + '1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", level=logging.INFO)
         self.epdDay = EpdDay(my_window=self)
         self.epdNight = EpdNight(my_window=self)
 
     def chekdirs(self):
         currentDate = datetime.datetime.now()
-        if not os.path.exists(self.LOGS + '\\' + currentDate.strftime("%Y%m%d") + '\\' + '1'):
-            os.makedirs(self.LOGS + '\\' + currentDate.strftime("%Y%m%d") + '\\' + '1')
+        if not os.path.exists(self.LOGS + '\\' + '1' + '\\' + currentDate.strftime("%Y%m%d")):
+            os.makedirs(self.LOGS + '\\' + '1' + '\\' + currentDate.strftime("%Y%m%d"))
         if not os.path.exists(self.isASFK):
             os.makedirs(self.isASFK)
         if not os.path.exists(self.isPUDS):

@@ -20,21 +20,25 @@ class EpdDay:
     def go_epd_day(self):
         print('день')
         files = os.listdir(self.isBANK)
-        count_files_before = (len(files) - 2)
+        count_files_before = len(files)
         print(count_files_before)
 
         try:
-           os.system('D:\\OEV\\Exg\\rcv\\unb64_rabis.exe *.* D:\\OEV\\Exg\\rcv >> D:\\OEV\\Exg\\rcv\\logs\\decod.log')
+           os.system('D:\\OEV\\Exg\\unb64_rabis.exe *.* D:\\OEV\\Exg\\rcv >> D:\\OEV\\Exg\\logs\\decod.log')
         except Exception:
             print('Ошибка ебучая')
 
         files = os.listdir(self.isBANK)
-        count_files_after = (len(files) - 2)
+        count_files_after = len(files)
         print(count_files_after)
 
-        if count_files_after - count_files_before == count_files_before:
+        if count_files_before == 0:
+            self.my_window.ui.textEdit.append('Отсутсвуют файлы для расшифровки')
+            logging.info('Отсутсвуют файлы для расшифровки')
+
+        elif count_files_after - count_files_before == count_files_before:
             self.my_window.ui.textEdit.append('Расшифровка файлов успешно завершена')
             logging.info('Расшифровка файлов успешно завершена')
         else:
-            self.my_window.ui.textEdit.append('Не удалось расшифровать все файлы, из ' + count_files_after + " " + "Расшифровано " + (count_files_after - count_files_before))
-            logging.error('Не удалось расшифровать все файлы, из ' + count_files_after + " " + "Расшифровано " + (count_files_after - count_files_before))
+            self.my_window.ui.textEdit.append('Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
+            logging.error('Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
