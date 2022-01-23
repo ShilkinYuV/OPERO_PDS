@@ -73,34 +73,34 @@ class OperoPDS(QtWidgets.QMainWindow):
                 for elem in items:
                     self.elementXML = str(elem.firstChild.data)
                     if self.elementXML.__contains__(type):
-                        self.ui.textEdit.append('       Начало копирования ' + file + ' в ' + self.inBANK)
-                        logging.info('       Начало копирования ' + file + ' в ' + self.inBANK)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Начало копирования ' + file + ' в ' + self.inBANK)
+                        logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + 'Начало копирования ' + file + ' в ' + self.inBANK)
                         isEmpty = False
                         try:
                             shutil.copy2(myFile, self.inBANK + '\\' + file)
-                            self.ui.textEdit.append('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено')
-                            logging.info('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено')
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено')
+                            logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено')
                         except Exception:
-                            self.ui.textEdit.append('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось')
-                            logging.error('Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось')
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось')
+                            logging.error(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось')
 
                         bankfiles = os.listdir(self.inBANK)
                         for bankfile in bankfiles:
                             if bankfile.__contains__(file):
-                                self.ui.textEdit.append('Файл ' + file + ' присутствует в ' + self.inBANK)
-                                logging.info('Файл ' + file + ' присутствует в ' + self.inBANK)
+                                self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + self.inBANK)
+                                logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + self.inBANK)
                                 try:
                                     os.remove(myFile)
-                                    self.ui.textEdit.append('Файл ' + file + ' удален из ' + currentdirs)
-                                    logging.info('Файл ' + file + ' удален из ' + currentdirs)
+                                    self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' удален из ' + currentdirs)
+                                    logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' удален из ' + currentdirs)
                                 except:
-                                    self.ui.textEdit.append('Не удалось удалить ' + file + ' из ' + currentdirs)
-                                    logging.error('Не удалось удалить ' + file + ' из ' + currentdirs)
+                                    self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось удалить ' + file + ' из ' + currentdirs)
+                                    logging.error(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось удалить ' + file + ' из ' + currentdirs)
 
         if isEmpty:
             sender = self.sender()
-            self.ui.textEdit.append('Корневые каталоги не содержат файлов ' + sender.text())
-            logging.info('Корневые каталоги не содержат файлов ' + sender.text())
+            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов ' + sender.text())
+            logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов ' + sender.text())
 
     def checkfiles(self):
         dirsASFKPUDS = [self.isASFK, self.isPUDS]
@@ -116,29 +116,29 @@ class OperoPDS(QtWidgets.QMainWindow):
                 for elem in items:
                     self.elementXML = str(elem.firstChild.data)
                     if self.elementXML.__contains__(self.OTVSEND):
-                        self.ui.textEdit.append('OTVSEND ' + file)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' OTVSEND ' + file)
                         isEmpty = False
                     elif self.elementXML.__contains__(self.OTVSEND):
-                        self.ui.textEdit.append('OTZVSEND ' + file)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' OTZVSEND ' + file)
                         isEmpty = False
                     elif self.elementXML.__contains__(self.PESSEND):
-                        self.ui.textEdit.append('PESSEND ' + file)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' PESSEND ' + file)
                         isEmpty = False
                     elif self.elementXML.__contains__(self.RNPSEND):
-                        self.ui.textEdit.append('RNPSEND ' + file)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' RNPSEND ' + file)
                         isEmpty = False
                     elif self.elementXML.__contains__(self.ZINFSEND):
-                        self.ui.textEdit.append('ZINFSEND ' + file)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZINFSEND ' + file)
                         isEmpty = False
                     elif self.elementXML.__contains__(self.ZONDSEND):
-                        self.ui.textEdit.append('ZONDSEND ' + file)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZONDSEND ' + file)
                         isEmpty = False
                     elif self.elementXML.__contains__(self.ZVPSEND):
-                        self.ui.textEdit.append('ZVPSEND ' + file)
+                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZVPSEND ' + file)
                         isEmpty = False
 
         if isEmpty:
-            self.ui.textEdit.append('Корневые каталоги не содержат файлов')
+            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов')
 
 
 if __name__ == '__main__':

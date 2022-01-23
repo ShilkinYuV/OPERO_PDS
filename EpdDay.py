@@ -33,12 +33,12 @@ class EpdDay:
         print(count_files_after)
 
         if count_files_before == 0:
-            self.my_window.ui.textEdit.append('Отсутсвуют файлы для расшифровки')
-            logging.info('Отсутсвуют файлы для расшифровки')
+            self.my_window.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
+            logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
 
         elif count_files_after - count_files_before == count_files_before:
-            self.my_window.ui.textEdit.append('Расшифровка файлов успешно завершена')
-            logging.info('Расшифровка файлов успешно завершена')
+            self.my_window.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
+            logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
         else:
-            self.my_window.ui.textEdit.append('Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
-            logging.error('Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
+            self.my_window.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
+            logging.error(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
