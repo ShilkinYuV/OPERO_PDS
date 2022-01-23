@@ -37,6 +37,36 @@ class NigthCicle(Thread):
 
     def run(self):
         while self.nigth.current_time > self.nigth.evening and self.nigth.current_time < self.nigth.tomorow_morning:
-            # тут вся движуха будет
-            sleep(1800)
+        # while True:
+            files = os.listdir(self.nigth.isBANK)
+            count_files_before = len(files)
+            print(count_files_before)
 
+            try:
+                os.system('D:\\OEV\\Exg\\unb64_rabis.exe *.* D:\\OEV\\Exg\\rcv >> D:\\OEV\\Exg\\logs\\decod.log')
+            except Exception:
+                print('Ошибка ебучая')
+
+            files = os.listdir(self.nigth.isBANK)
+            count_files_after = len(files)
+            print(count_files_after)
+
+            if count_files_before == 0:
+                self.nigth.my_window.ui.textEdit.append(
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
+                logging.info(
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
+
+            elif count_files_after - count_files_before == count_files_before:
+                self.nigth.my_window.ui.textEdit.append(
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
+                logging.info(
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
+            else:
+                self.nigth.my_window.ui.textEdit.append(datetime.datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(
+                    count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
+                logging.error(datetime.datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(
+                    count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
+            sleep(1800)
