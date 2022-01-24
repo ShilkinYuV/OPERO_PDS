@@ -6,16 +6,16 @@ import os
 import shutil
 import datetime
 import logging
-
+from path_constants import fromBANK, toPUDS, toASFK, decoderPath, decoderLogs
 
 class EpdDay:
 
     def __init__(self, my_window):
         self.my_window = my_window
         self.my_window.ui.day.clicked.connect(self.go_epd_day)
-        self.isBANK = 'D:\\OEV\\Exg\\rcv'
-        self.inASFK = 'D:\\inASFK'
-        self.inPUDS = 'D:\\inPUDS'
+        self.isBANK = fromBANK
+        self.inASFK = toASFK
+        self.inPUDS = toPUDS
 
     def go_epd_day(self):
         print('день')
@@ -24,7 +24,7 @@ class EpdDay:
         print(count_files_before)
 
         try:
-           os.system('D:\\OEV\\Exg\\unb64_rabis.exe *.* D:\\OEV\\Exg\\rcv >> D:\\OEV\\Exg\\logs\\decod.log')
+           os.system('{decoderPath} *.* {fromBank} >> {decoderLogs}'.format(fromBANK=fromBANK,decoderPath=decoderPath,decoderLogs=decoderLogs))
         except Exception:
             print('Ошибка ебучая')
 

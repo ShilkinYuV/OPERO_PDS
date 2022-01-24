@@ -12,7 +12,7 @@ import shutil
 import datetime
 import logging
 import subprocess
-
+from path_constants import fromASFK,fromPUDS,toBANK, logTo
 
 class OperoPDS(QtWidgets.QMainWindow):
 
@@ -21,10 +21,10 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         currentDate = datetime.datetime.now()
-        self.isASFK = 'D:\\isASFK' + '\\' + currentDate.strftime("%Y%m%d")
-        self.isPUDS = 'D:\\isPUDS' + '\\' + currentDate.strftime("%Y%m%d")
-        self.inBANK = 'D:\\OEV\\Exg\\cli'
-        self.LOGS = 'D:\\LOGS'
+        self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
+        self.isPUDS = fromPUDS + '\\' + currentDate.strftime("%Y%m%d")
+        self.inBANK = toBANK
+        self.LOGS = logTo
         self.OTVSEND = 'RDI0NCB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI'
         self.OTZVSEND = 'RDI3NSB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI'
         self.PESSEND = 'YWNrZXRFSUQgeG1sbnM9InVybjpjYnItcnU6ZWQ6djIuMCIgRURObz0i'
@@ -42,15 +42,15 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui.ZVPSEND.clicked.connect(lambda: self.sending(self.ZVPSEND))
         self.ui.clearWindow.clicked.connect(self.clearWindow)
         self.chekdirs()
-        logging.basicConfig(filename="D:\\LOGS\\" + '1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", level=logging.INFO)
+        logging.basicConfig(filename=logTo + '\\1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", level=logging.INFO)
         self.epdDay = EpdDay(my_window=self)
         self.epdNight = EpdNight(my_window=self)
 
     def updateDates(self):
         '''Update current date and current directories by this date'''
         currentDate = datetime.datetime.now()
-        self.isASFK = 'D:\\isASFK' + '\\' + currentDate.strftime("%Y%m%d")
-        self.isPUDS = 'D:\\isPUDS' + '\\' + currentDate.strftime("%Y%m%d")
+        self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
+        self.isPUDS = fromPUDS + '\\' + currentDate.strftime("%Y%m%d")
 
     def chekdirs(self):
         self.updateDates()
