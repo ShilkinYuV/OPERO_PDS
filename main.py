@@ -42,7 +42,7 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui.ZVPSEND.clicked.connect(lambda: self.sending(self.ZVPSEND))
         self.ui.clearWindow.clicked.connect(self.clearWindow)
         self.chekdirs()
-        logging.basicConfig(filename=logTo + '1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", level=logging.INFO)
+        logging.basicConfig(filename=logTo + '\\1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", level=logging.INFO)
         self.epdDay = EpdDay(my_window=self)
         self.epdNight = EpdNight(my_window=self)
 
