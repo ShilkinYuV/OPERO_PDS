@@ -46,7 +46,14 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.epdDay = EpdDay(my_window=self)
         self.epdNight = EpdNight(my_window=self)
 
+    def updateDates(self):
+        '''Update current date and current directories by this date'''
+        currentDate = datetime.datetime.now()
+        self.isASFK = 'D:\\isASFK' + '\\' + currentDate.strftime("%Y%m%d")
+        self.isPUDS = 'D:\\isPUDS' + '\\' + currentDate.strftime("%Y%m%d")
+
     def chekdirs(self):
+        self.updateDates()
         currentDate = datetime.datetime.now()
         if not os.path.exists(self.LOGS + '\\' + '1' + '\\' + currentDate.strftime("%Y%m%d")):
             os.makedirs(self.LOGS + '\\' + '1' + '\\' + currentDate.strftime("%Y%m%d"))
@@ -59,6 +66,7 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.ui.textEdit.clear()
 
     def sending(self, type):
+        self.updateDates()
         dirsASFKPUDS = [self.isASFK, self.isPUDS]
         isEmpty = True
         for currentdirs in dirsASFKPUDS:
@@ -103,6 +111,7 @@ class OperoPDS(QtWidgets.QMainWindow):
             logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов ' + sender.text())
 
     def checkfiles(self):
+        self.updateDates()
         dirsASFKPUDS = [self.isASFK, self.isPUDS]
         isEmpty = True
         for currentdirs in dirsASFKPUDS:
