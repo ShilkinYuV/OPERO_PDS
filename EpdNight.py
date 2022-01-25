@@ -27,12 +27,14 @@ class EpdNight:
         self.tomorrow = self.today + datetime.timedelta(days=1)
         self.tomorow_morning = self.tomorrow.replace(hour=9, minute=0, second=0, microsecond=0)
         self.evening = datetime.datetime.now().replace(hour=18, minute=0, second=0, microsecond=0)
+        self.pressButton = False
 
     # метод запускает выполнение потока из класса NightCicle
     def go_epd_night(self):
         self.current_time = datetime.datetime.now()
         self.UpdateDate()
         nightCicle = NightCicle(night=self)
+        nightCicle.setDaemon(True)
         nightCicle.start()
 
     # обновление переменных времени
@@ -48,9 +50,18 @@ class NightCicle(Thread):
     def __init__(self, night):
         Thread.__init__(self)
         self.night = night
+        if self.night.pressButton:
+            self.night.pressButton = False
+            self.night.my_window.ui.night.setStyleSheet('QPushButton {background-color: #607E91;} QPushButton:hover {background-color: #8AB6D1;}')
+
+        else:
+            self.night.pressButton = True
+            self.night.my_window.ui.night.setStyleSheet('QPushButton {background-color: #8AB6D1;} QPushButton:hover {background-color: #607E91;}')
 
     def run(self):
         while True:
+            if not self.night.pressButton:
+                break
             self.current_time = datetime.datetime.now()
             if self.night.current_time > self.night.evening and self.night.current_time < self.night.tomorow_morning:
 
