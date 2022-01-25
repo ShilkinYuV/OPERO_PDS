@@ -17,21 +17,23 @@ class EpdDay:
         self.inASFK = toASFK
         self.inPUDS = toPUDS
 
+    # Расшифровка документов от банка днем
     def go_epd_day(self):
         print('день')
+        # Проверка количества документов в каталоге isBank до декодирования
         files = os.listdir(self.isBANK)
         count_files_before = len(files)
         print(count_files_before)
-
+        # Декодирование
         try:
            os.system('{decoderPath} *.* {fromBank} >> {decoderLogs}'.format(fromBANK=fromBANK,decoderPath=decoderPath,decoderLogs=decoderLogs))
         except Exception:
             print('Ошибка ебучая')
-
+        # Проверка количества документов в каталоге isBank после декодирования
         files = os.listdir(self.isBANK)
         count_files_after = len(files)
         print(count_files_after)
-
+        # Сравнение количества документов до и после декодирования, логирование и вывод на экран
         if count_files_before == 0:
             self.my_window.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
             logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')

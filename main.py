@@ -13,7 +13,6 @@ import datetime
 import logging
 import subprocess
 from path_constants import fromASFK,fromPUDS,toBANK, logTo
-QtCore.QDir.addSearchPath('icons', 'OPERO_PDS/')
 
 
 class OperoPDS(QtWidgets.QMainWindow):
@@ -48,12 +47,13 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.epdDay = EpdDay(my_window=self)
         self.epdNight = EpdNight(my_window=self)
 
+    # обновление имен каталого в наименованием текущей даты
     def updateDates(self):
-        '''Update current date and current directories by this date'''
         currentDate = datetime.datetime.now()
         self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
         self.isPUDS = fromPUDS + '\\' + currentDate.strftime("%Y%m%d")
 
+    # Проверка существуют ли каталоги, если не существуют то каталоги создаются
     def chekdirs(self):
         self.updateDates()
         currentDate = datetime.datetime.now()
@@ -67,6 +67,7 @@ class OperoPDS(QtWidgets.QMainWindow):
     def clearWindow(self):
         self.ui.textEdit.clear()
 
+    #Копирование файлов из isASFK и isPUDS в зависимости от типа, логирование и вывод результата на экран
     def sending(self, type):
         self.updateDates()
         dirsASFKPUDS = [self.isASFK, self.isPUDS]
@@ -112,6 +113,7 @@ class OperoPDS(QtWidgets.QMainWindow):
             self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов ' + sender.text())
             logging.info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов ' + sender.text())
 
+    # Метод проверяет наличие файлов в каталогах isASFK и isPuds, результат выводит на экран
     def checkfiles(self):
         self.updateDates()
         dirsASFKPUDS = [self.isASFK, self.isPUDS]
