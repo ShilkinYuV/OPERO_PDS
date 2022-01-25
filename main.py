@@ -1,6 +1,6 @@
 import sys
 
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow
 from PyQt6.QtGui import QIcon
 from mainapp import Ui_MainWindow
@@ -13,6 +13,8 @@ import datetime
 import logging
 import subprocess
 from path_constants import fromASFK,fromPUDS,toBANK, logTo
+QtCore.QDir.addSearchPath('icons', 'OPERO_PDS/')
+
 
 class OperoPDS(QtWidgets.QMainWindow):
 
