@@ -90,6 +90,17 @@ class EpdNight(QObject):
                                                     fromBankArhive + '\\' + datetime.datetime.now().strftime(
                                                 "%Y%m%d")) + ' не удалось')
 
+    def mapping_network_drives(self):
+        os.system('set trans_disk=x:')
+        os.system('set puds_disk=w:')
+        os.system('net use %trans_disk% /delete /y')
+        os.system('net use %puds_disk% /delete /y')
+        os.system('net use x: \\\\10.48.4.241\\transportbanks 1!QQww /USER:10.48.4.241\\svc95004800')
+        os.system('net use w: \\\\10.48.4.241\\transport 1!QQww /USER:10.48.4.241\\svc95004800')
+
+    def copyInASFKAndPUDS(self):
+        pass
+
 # Класс поток для расшифровки документов от банка ночью вызывается в NightCicle
 class NightCicle(Thread):
     log_str = QtCore.pyqtSignal(str)
@@ -113,6 +124,7 @@ class NightCicle(Thread):
             if True:
                 self.night.decodeFiles()
                 self.night.copyArhive()
+                # self.night.mapping_network_drives()
                 sleep(1800)
             else:
                 self.night.UpdateDate()

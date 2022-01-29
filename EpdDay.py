@@ -26,6 +26,7 @@ class EpdDay(QObject):
         print('день')
         self.decodeFiles()
         self.copyArhive()
+        # self.mapping_network_drives()
 
     def decodeFiles(self):
         # Проверка количества документов в каталоге isBank до декодирования
@@ -82,3 +83,15 @@ class EpdDay(QObject):
                         "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + ' в ' + (
                                           fromBankArhive + '\\' + datetime.datetime.now().strftime(
                                       "%Y%m%d")) + ' не удалось')
+
+    def mapping_network_drives(self):
+        os.system('set trans_disk=x:')
+        os.system('set puds_disk=w:')
+        os.system('net use %trans_disk% /delete /y')
+        os.system('net use %puds_disk% /delete /y')
+        os.system('net use x: \\\\10.48.4.241\\transportbanks 1!QQww /USER:10.48.4.241\\svc95004800')
+        os.system('net use w: \\\\10.48.4.241\\transport 1!QQww /USER:10.48.4.241\\svc95004800')
+
+
+    def copyInASFKAndPUDS(self):
+        pass
