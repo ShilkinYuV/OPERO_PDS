@@ -24,6 +24,7 @@ class OperoPDS(QtWidgets.QMainWindow):
         super(OperoPDS, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.ui.textEdit.setReadOnly(True)
         currentDate = datetime.datetime.now()
         self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
         self.isASFKArhive = fromASFK + '\\' + str(1)
