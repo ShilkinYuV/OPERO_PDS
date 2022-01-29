@@ -2,8 +2,8 @@ import sys
 from threading import Thread
 from time import sleep
 from turtle import update
-
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets, QtCore
+from PyQt6.QtCore import QObject
 from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow
 from PyQt6.QtGui import QIcon
 import os
@@ -11,12 +11,14 @@ import shutil
 import datetime
 import logging
 
-from path_constants import fromBANK, toPUDS, toASFK, decoderPath, decoderLogs
+from path_constants import fromBANK, toPUDS, toASFK, decoderPath, decoderLogs, fromBANKBuff, fromBankArhive
 
 
-class EpdNight:
+class EpdNight(QObject):
+    log_str = QtCore.pyqtSignal(str)
 
     def __init__(self, my_window):
+        super(EpdNight, self).__init__()
         self.my_window = my_window
         self.my_window.ui.night.clicked.connect(self.go_epd_night)
         self.isBANK = fromBANK
@@ -44,9 +46,53 @@ class EpdNight:
         self.tomorow_morning = self.tomorrow.replace(hour=9, minute=0, second=0, microsecond=0)
         self.evening = datetime.datetime.now().replace(hour=18, minute=0, second=0, microsecond=0)
 
+    def decodeFiles(self):
+        # Проверка количества документов в каталоге isBank до декодирования
+        files = os.listdir(self.isBANK)
+        count_files_before = len(files)
+        print(count_files_before)
+        # Декодирование
+        command = '{decoderPath} *.* {fromBANK} D:\\OEV\\Exg\\buff >> {decoderLogs}'.format(fromBANK=fromBANK,decoderPath=decoderPath,decoderLogs=decoderLogs, fromBANKBuff=fromBANKBuff)
+        try:
+           os.system(command)
+        except Exception:
+            print('Ошибка ебучая')
+        # Проверка количества документов в каталоге isBank после декодирования
+        files = os.listdir('D:\\OEV\\Exg\\buff')
+        count_files_after = len(files)
+        print(count_files_after)
+        # Сравнение количества документов до и после декодирования, логирование и вывод на экран
+        if count_files_before == 0:
+            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
+        elif count_files_after == count_files_before:
+            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
+        else:
+            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
+
+    def copyArhive(self):
+        current_date_arhive_directory_ed = fromBankArhive + '\\' + datetime.datetime.now().strftime(
+            "%Y%m%d") + '\\uarm3\\\inc\\ed'
+        typefiles = os.listdir(fromBANKBuff)
+        for file in typefiles:
+            print(file)
+            if file.__contains__('ED.xml') or (file.__contains__('ED211') and file.__contains__('EDS.xml')):
+                if not os.path.exists(current_date_arhive_directory_ed):
+                    os.makedirs(current_date_arhive_directory_ed)
+                try:
+                    shutil.copy2(fromBANKBuff + '\\' + file, current_date_arhive_directory_ed)
+                    self.log_str.emit(datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
+                                                        fromBankArhive + '\\' + datetime.datetime.now().strftime(
+                                                    "%Y%m%d")) + ' успешно завершено')
+                except Exception:
+                    self.log_str.emit(datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
+                                                    fromBankArhive + '\\' + datetime.datetime.now().strftime(
+                                                "%Y%m%d")) + ' не удалось')
 
 # Класс поток для расшифровки документов от банка ночью вызывается в NightCicle
 class NightCicle(Thread):
+    log_str = QtCore.pyqtSignal(str)
     def __init__(self, night):
         Thread.__init__(self)
         self.night = night
@@ -63,42 +109,10 @@ class NightCicle(Thread):
             if not self.night.pressButton:
                 break
             self.current_time = datetime.datetime.now()
-            if self.night.current_time > self.night.evening and self.night.current_time < self.night.tomorow_morning:
-
-                files = os.listdir(self.night.isBANK)
-                count_files_before = len(files)
-                print(count_files_before)
-
-                try:
-                    os.system('{decoderPath} *.* {fromBank} >> {decoderLogs}'.format(fromBANK=fromBANK,
-                                                                                     decoderPath=decoderPath,
-                                                                                     decoderLogs=decoderLogs))
-                except Exception:
-                    print('Ошибка ебучая')
-
-                files = os.listdir(self.night.isBANK)
-                count_files_after = len(files)
-                print(count_files_after)
-
-                if count_files_before == 0:
-                    self.night.my_window.ui.textEdit.append(
-                        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
-                    logging.info(
-                        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
-
-                elif count_files_after - count_files_before == count_files_before:
-                    self.night.my_window.ui.textEdit.append(
-                        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
-                    logging.info(
-                        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
-                else:
-                    self.night.my_window.ui.textEdit.append(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(
-                        count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
-                    logging.error(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(
-                        count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
-
+            # if self.night.current_time > self.night.evening and self.night.current_time < self.night.tomorow_morning:
+            if True:
+                self.night.decodeFiles()
+                self.night.copyArhive()
                 sleep(1800)
             else:
                 self.night.UpdateDate()
