@@ -56,6 +56,7 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.epdDay.log_str.connect(self.logining)
         self.log_str.connect(self.logining)
 
+    # Вывод информации на экран и логирование
     @QtCore.pyqtSlot(str)
     def logining(self, str):
         self.ui.textEdit.append(str)

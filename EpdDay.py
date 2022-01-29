@@ -28,6 +28,7 @@ class EpdDay(QObject):
         self.copyArhive()
         # self.mapping_network_drives()
 
+    # Расшифровка файлов
     def decodeFiles(self):
         # Проверка количества документов в каталоге isBank до декодирования
         files = os.listdir(self.isBANK)
@@ -55,6 +56,7 @@ class EpdDay(QObject):
             self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(
                     count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
 
+    # Копирование в архивные папки
     def copyArhive(self):
         current_date_arhive_directory_ed = fromBankArhive + '\\' + datetime.datetime.now().strftime(
             "%Y%m%d") + '\\uarm3\\\inc\\ed'
@@ -84,6 +86,7 @@ class EpdDay(QObject):
                                           fromBankArhive + '\\' + datetime.datetime.now().strftime(
                                       "%Y%m%d")) + ' не удалось')
 
+    # подключение сетевых дисков
     def mapping_network_drives(self):
         os.system('set trans_disk=x:')
         os.system('set puds_disk=w:')
@@ -92,6 +95,6 @@ class EpdDay(QObject):
         os.system('net use x: \\\\10.48.4.241\\transportbanks 1!QQww /USER:10.48.4.241\\svc95004800')
         os.system('net use w: \\\\10.48.4.241\\transport 1!QQww /USER:10.48.4.241\\svc95004800')
 
-
+    # копирование в целевой каталог
     def copyInASFKAndPUDS(self):
         pass
