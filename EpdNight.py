@@ -52,23 +52,30 @@ class EpdNight(QObject):
         files = os.listdir(self.isBANK)
         count_files_before = len(files)
         print(count_files_before)
-        # Декодирование
-        command = '{decoderPath} *.* {fromBANK} D:\\OEV\\Exg\\buff >> {decoderLogs}'.format(fromBANK=fromBANK,decoderPath=decoderPath,decoderLogs=decoderLogs, fromBANKBuff=fromBANKBuff)
-        try:
-           os.system(command)
-        except Exception:
-            print('Ошибка ебучая')
-        # Проверка количества документов в каталоге isBank после декодирования
-        files = os.listdir('D:\\OEV\\Exg\\buff')
-        count_files_after = len(files)
-        print(count_files_after)
-        # Сравнение количества документов до и после декодирования, логирование и вывод на экран
-        if count_files_before == 0:
-            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
-        elif count_files_after == count_files_before:
-            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
-        else:
-            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(count_files_after) + " " + "Расшифровано " + str(count_files_after - count_files_before))
+        for file in files:
+            shutil.move(self.isBANK + '\\' + file, fromBANKBuff)
+            # Декодирование
+            command = '{decoderPath} *.* {fromBANKBuff} >> {decoderLogs}'.format(fromBANK=fromBANK,
+                                                                                                decoderPath=decoderPath,
+                                                                                                decoderLogs=decoderLogs,
+                                                                                                fromBANKBuff=fromBANKBuff)
+            try:
+                os.system(command)
+            except Exception:
+                print('Ошибка ебучая')
+
+            # Проверка количества документов в каталоге isBank после декодирования
+            files = os.listdir(fromBANKBuff)
+            count_files_after = len(files)
+            print(count_files_after)
+            # Сравнение количества документов до и после декодирования, логирование и вывод на экран
+            if count_files_before == 0:
+                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
+            elif count_files_after - 2 == count_files_before:
+                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
+            else:
+                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(
+                        count_files_after) + " " + "Расшифровано " + str((count_files_after - 2) - count_files_before))
 
     # Копирование в архивные папки
     def copyArhive(self):
@@ -82,15 +89,23 @@ class EpdNight(QObject):
                     os.makedirs(current_date_arhive_directory_ed)
                 try:
                     shutil.copy2(fromBANKBuff + '\\' + file, current_date_arhive_directory_ed)
-                    self.log_str.emit(datetime.datetime.now().strftime(
+                    self.my_window.ui.textEdit.append(datetime.datetime.now().strftime(
                         "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
                                                         fromBankArhive + '\\' + datetime.datetime.now().strftime(
                                                     "%Y%m%d")) + ' успешно завершено')
+                    logging.info(datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + ' в ' + (
+                                             fromBankArhive + '\\' + datetime.datetime.now().strftime(
+                                         "%Y%m%d")) + ' успешно завершено')
                 except Exception:
-                    self.log_str.emit(datetime.datetime.now().strftime(
+                    self.my_window.ui.textEdit.append(datetime.datetime.now().strftime(
                         "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
                                                     fromBankArhive + '\\' + datetime.datetime.now().strftime(
                                                 "%Y%m%d")) + ' не удалось')
+                    logging.error(datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + ' в ' + (
+                                          fromBankArhive + '\\' + datetime.datetime.now().strftime(
+                                      "%Y%m%d")) + ' не удалось')
 
     # подключение сетевых дисков
     def mapping_network_drives(self):
@@ -103,7 +118,51 @@ class EpdNight(QObject):
 
     # копирование в целевой каталог
     def copyInASFKAndPUDS(self):
-        pass
+        chekFileToASFK = False
+        chekFileToPUDS = False
+        files = os.listdir(fromBANKBuff)
+        for file in files:
+            myFile = fromBANKBuff + '\\' + file
+            if file.__contains__('ED.xml') or (file.__contains__('ED211') and file.__contains__('EDS.xml')):
+                try:
+                    shutil.copy2(fromBANKBuff + '\\' + file, toASFK)
+                except Exception:
+                    self.log_str.emit(datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + toASFK + ' не удалось')
+                try:
+                    shutil.copy2(fromBANKBuff + '\\' + file, toPUDS)
+                except Exception:
+                    self.log_str.emit(datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + toPUDS + ' не удалось')
+
+                filesToASFK = os.listdir(toASFK)
+                for fileToASFK in filesToASFK:
+                    if fileToASFK.__contains__(file):
+                        self.log_str.emit(datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + toASFK)
+                        chekFileToASFK = True
+
+                filesToPUDS = os.listdir(toPUDS)
+                for fileToPUDS in filesToPUDS:
+                    if fileToASFK.__contains__(file):
+                        self.log_str.emit(datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + toPUDS)
+                        chekFileToPUDS = True
+
+                if chekFileToASFK and chekFileToPUDS:
+                    try:
+                        os.remove(myFile)
+                        self.log_str.emit(datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' удален из ' + fromBANKBuff)
+                        chekArhive = False
+                    except:
+                        self.log_str.emit(datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S") + ' Не удалось удалить ' + file + ' из ' + fromBANKBuff)
+                        chekArhive = False
+            try:
+                shutil.move(fromBANKBuff + '\\' + file, fromBANKBuff + '\\' + '1')
+            except Exception:
+                pass
 
 # Класс поток для расшифровки документов от банка ночью вызывается в NightCicle
 class NightCicle(Thread):
@@ -129,6 +188,7 @@ class NightCicle(Thread):
                 self.night.decodeFiles()
                 self.night.copyArhive()
                 # self.night.mapping_network_drives()
+                self.night.copyInASFKAndPUDS()
                 sleep(1800)
             else:
                 self.night.UpdateDate()

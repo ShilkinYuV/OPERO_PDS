@@ -1,8 +1,8 @@
 fromASFK = 'D:\\isASFK'
 fromPUDS = 'D:\\isPUDS'
 
-toASFK = 'D:\\inASFK'
-toPUDS = 'D:\\inPUDS'
+toASFK = 'D:\\IN_OEBS_BIK\\044525000'
+toPUDS = 'D:\\input'
 
 toBANK = 'D:\\OEV\\Exg\\cli'
 fromBANK = 'D:\\OEV\\Exg\\rcv'

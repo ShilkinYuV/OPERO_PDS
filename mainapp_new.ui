@@ -89,7 +89,7 @@ background-color: #364752;
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap>:/bank.png</pixmap>
+             <pixmap>icon/bank.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>false</bool>
@@ -124,6 +124,7 @@ padding-right: 20px;
             <property name="font">
              <font>
               <pointsize>12</pointsize>
+              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -137,6 +138,7 @@ padding-right: 20px;
             <property name="font">
              <font>
               <pointsize>12</pointsize>
+              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -241,7 +243,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/check.png</normaloff>:/check.png</iconset>
+              <normaloff>icon/check.png</normaloff>icon/check.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -264,7 +266,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -287,7 +289,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -310,7 +312,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -333,7 +335,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -356,7 +358,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -379,7 +381,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -405,7 +407,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -441,7 +443,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/code.png</normaloff>:/code.png</iconset>
+              <normaloff>icon/code.png</normaloff>icon/code.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -464,7 +466,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/code.png</normaloff>:/code.png</iconset>
+              <normaloff>icon/code.png</normaloff>icon/code.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -500,7 +502,7 @@ border-radius: 5px;
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>:/clear.png</normaloff>:/clear.png</iconset>
+              <normaloff>icon/clear.png</normaloff>icon/clear.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -517,6 +519,7 @@ border-radius: 5px;
         <widget class="QWidget" name="widget_3" native="true">
          <property name="font">
           <font>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -557,6 +560,7 @@ border-radius: 5px;
             <property name="font">
              <font>
               <pointsize>12</pointsize>
+              <weight>50</weight>
               <italic>false</italic>
               <bold>false</bold>
              </font>
