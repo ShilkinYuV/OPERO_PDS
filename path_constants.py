@@ -12,3 +12,6 @@ logTo = 'D:\\LOGS'
 
 decoderPath = 'D:\\OEV\\Exg\\unb64_rabis.exe'
 decoderLogs = 'D:\\OEV\\Exg\\logs\\decod.log'
+
+
+

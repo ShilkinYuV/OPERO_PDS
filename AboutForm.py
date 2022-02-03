@@ -1,8 +1,7 @@
-from PyQt6.QtWidgets import QMessageBox
+
 from AboutWindow import Ui_aboutWindow
 from PyQt6 import QtWidgets
 import constants
-
 
 
 class AboutForm(QtWidgets.QWidget):
@@ -12,3 +11,4 @@ class AboutForm(QtWidgets.QWidget):
         self.ui.setupUi(self)
         self.ui.poLabel.setText(constants.app_name)
         self.ui.versionLabel.setText(self.ui.versionLabel.text() + constants.app_version)
+        self.setFixedSize(self.size())

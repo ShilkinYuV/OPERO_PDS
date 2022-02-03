@@ -1,11 +1,8 @@
 import sys
 from threading import Thread
 from time import sleep
-from turtle import update
 from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtCore import QObject
-from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow
-from PyQt6.QtGui import QIcon
 import os
 import shutil
 import datetime

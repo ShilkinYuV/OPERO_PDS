@@ -1,8 +1,6 @@
 import sys
 
-from PyQt6 import QtWidgets, QtCore
-from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow
-from PyQt6.QtGui import QIcon
+from PyQt6 import QtWidgets, QtCore, QtGui
 
 from AboutForm import AboutForm
 from mainapp import Ui_MainWindow
@@ -13,13 +11,7 @@ import os
 import shutil
 import datetime
 import logging
-import subprocess
-from path_constants import fromASFK,fromPUDS,toBANK, logTo
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+from path_constants import fromASFK, fromPUDS, toBANK, logTo
 
 
 class OperoPDS(QtWidgets.QMainWindow):
