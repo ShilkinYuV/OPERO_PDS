@@ -15,7 +15,7 @@ from path_constants import fromASFK, fromPUDS, toBANK, logTo
 
 
 class OperoPDS(QtWidgets.QMainWindow):
-    log_str = QtCore.pyqtSignal(str)
+    log_str = QtCore.pyqtSignal(str, bool)
 
     def __init__(self):
         super(OperoPDS, self).__init__()
@@ -54,10 +54,17 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.log_str.connect(self.logining)
 
     # Вывод информации на экран и логирование
-    @QtCore.pyqtSlot(str)
-    def logining(self, str):
-        self.ui.textEdit.append(str)
-        logging.info(str)
+    @QtCore.pyqtSlot(str, bool)
+    def logining(self, text, type):
+        if type:
+            logging.info(text)
+        else: 
+            logging.error(text)
+
+        text = text.replace('|', '')
+        text = text.replace(text[19:26],'')
+
+        self.ui.textEdit.append(text)
 
         # обновление имен каталого в наименованием текущей даты
     def updateDates(self):
@@ -96,42 +103,42 @@ class OperoPDS(QtWidgets.QMainWindow):
                 for elem in items:
                     self.elementXML = str(elem.firstChild.data)
                     if self.elementXML.__contains__(type):
-                        self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Начало копирования ' + file + ' в ' + self.inBANK)
+                        self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Начало копирования ' + file + ' в ' + self.inBANK, True)
                         isEmpty = False
                         try:
-                            shutil.copy2(myFile, self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"))
-                            self.log_str.emit(datetime.datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' успешно завершено')
+                            shutil.copy2(myFile, self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"), True)
+                            self.log_str.emit('|'+datetime.datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' успешно завершено', True)
                         except Exception:
-                            self.log_str.emit(datetime.datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' не удалось')
+                            self.log_str.emit('|'+datetime.datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' не удалось', False)
                         try:
                             shutil.copy2(myFile, self.inBANK)
-                            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено')
+                            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено', True)
                         except Exception:
-                            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось')
+                            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось', False)
 
                         arhivefiles = os.listdir(self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"))
                         for arhive in arhivefiles:
                             if arhive.__contains__(file):
-                                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")))
+                                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")), True)
                                 chekArhive = True
 
                         bankfiles = os.listdir(self.inBANK)
                         for bankfile in bankfiles:
                             if bankfile.__contains__(file) and chekArhive:
-                                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + self.inBANK)
+                                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + self.inBANK, True)
                                 try:
                                     os.remove(myFile)
-                                    self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' удален из ' + currentdirs)
+                                    self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' удален из ' + currentdirs, True)
                                     chekArhive = False
                                 except:
-                                    self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось удалить ' + file + ' из ' + currentdirs)
+                                    self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Не удалось удалить ' + file + ' из ' + currentdirs, False)
                                     chekArhive = False
 
         if isEmpty:
             sender = self.sender()
-            self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов ' + sender.text())
+            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Корневые каталоги не содержат файлов ' + sender.text(), True)
 
     # Метод проверяет наличие файлов в каталогах isASFK и isPuds, результат выводит на экран
     def checkfiles(self):
