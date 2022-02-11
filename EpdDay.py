@@ -9,7 +9,7 @@ from path_constants import fromBANK, toPUDS, toASFK, decoderPath, decoderLogs, f
 
 
 class EpdDay(QObject):
-    log_str = QtCore.pyqtSignal(str)
+    log_str = QtCore.pyqtSignal(str, bool)
 
     def __init__(self, my_window):
         super(EpdDay, self).__init__()
@@ -51,12 +51,12 @@ class EpdDay(QObject):
             print(count_files_after)
             # Сравнение количества документов до и после декодирования, логирование и вывод на экран
             if count_files_before == 0:
-                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Отсутсвуют файлы для расшифровки')
+                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Отсутсвуют файлы для расшифровки', True)
             elif count_files_after - 2 == count_files_before:
-                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Расшифровка файлов успешно завершена')
+                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Расшифровка файлов успешно завершена', True)
             else:
-                self.log_str.emit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Не удалось расшифровать все файлы, из ' + str(
-                        count_files_after) + " " + "Расшифровано " + str((count_files_after - 2) - count_files_before))
+                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Не удалось расшифровать все файлы, из ' + str(
+                        count_files_after) + " " + "Расшифровано " + str((count_files_after - 2) - count_files_before), False)
 
     # Копирование в архивные папки
     def copyArhive(self):
@@ -70,23 +70,15 @@ class EpdDay(QObject):
                     os.makedirs(current_date_arhive_directory_ed)
                 try:
                     shutil.copy2(fromBANKBuff + '\\' + file, current_date_arhive_directory_ed)
-                    self.my_window.ui.textEdit.append(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
+                    self.log_str.emit('|'+datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
                                                         fromBankArhive + '\\' + datetime.datetime.now().strftime(
-                                                    "%Y%m%d")) + ' успешно завершено')
-                    logging.info(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + ' в ' + (
-                                             fromBankArhive + '\\' + datetime.datetime.now().strftime(
-                                         "%Y%m%d")) + ' успешно завершено')
+                                                    "%Y%m%d")) + ' успешно завершено', True)
                 except Exception:
-                    self.my_window.ui.textEdit.append(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
+                    self.log_str.emit('|'+datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + (
                                                     fromBankArhive + '\\' + datetime.datetime.now().strftime(
-                                                "%Y%m%d")) + ' не удалось')
-                    logging.error(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + ' в ' + (
-                                          fromBankArhive + '\\' + datetime.datetime.now().strftime(
-                                      "%Y%m%d")) + ' не удалось')
+                                                "%Y%m%d")) + ' не удалось', False)
 
     # подключение сетевых дисков
     def mapping_network_drives(self):
@@ -108,37 +100,37 @@ class EpdDay(QObject):
                 try:
                     shutil.copy2(fromBANKBuff + '\\' + file, toASFK)
                 except Exception:
-                    self.log_str.emit(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + toASFK + ' не удалось')
+                    self.log_str.emit('|'+datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + toASFK + ' не удалось', False)
                 try:
                     shutil.copy2(fromBANKBuff + '\\' + file, toPUDS)
                 except Exception:
-                    self.log_str.emit(datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S") + ' Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + toPUDS + ' не удалось')
+                    self.log_str.emit('|'+datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + fromBANKBuff + '\n' + ' в ' + toPUDS + ' не удалось', False)
 
                 filesToASFK = os.listdir(toASFK)
                 for fileToASFK in filesToASFK:
                     if fileToASFK.__contains__(file):
-                        self.log_str.emit(datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + toASFK)
+                        self.log_str.emit('|'+datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + toASFK, True)
                         chekFileToASFK = True
 
                 filesToPUDS = os.listdir(toPUDS)
                 for fileToPUDS in filesToPUDS:
                     if fileToASFK.__contains__(file):
-                        self.log_str.emit(datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' присутствует в ' + toPUDS)
+                        self.log_str.emit('|'+datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + toPUDS, True)
                         chekFileToPUDS = True
 
                 if chekFileToASFK and chekFileToPUDS:
                     try:
                         os.remove(myFile)
-                        self.log_str.emit(datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S") + ' Файл ' + file + ' удален из ' + fromBANKBuff)
+                        self.log_str.emit('|'+datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' удален из ' + fromBANKBuff, True)
                         chekArhive = False
                     except:
-                        self.log_str.emit(datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S") + ' Не удалось удалить ' + file + ' из ' + fromBANKBuff)
+                        self.log_str.emit('|'+datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S.%f") + '| Не удалось удалить ' + file + ' из ' + fromBANKBuff, False)
                         chekArhive = False
             try:
                 shutil.move(fromBANKBuff + '\\' + file, fromBANKBuff + '\\' + '1')
