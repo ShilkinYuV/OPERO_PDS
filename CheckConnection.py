@@ -26,5 +26,5 @@ class CheckConnection(Thread):
                 "%Y-%m-%d %H:%M:%S.%f") + '| CheckConnectionn')
 
             self.mapping_network_drives()
-            shutil.copy2(logTo + '\\1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", 'x:\\LOGS_FOR_SEND_MESSAGE')
+            shutil.copy2(logTo + '\\1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", 'w:\\LOGS_FOR_SEND_MESSAGE')
             sleep(300)
