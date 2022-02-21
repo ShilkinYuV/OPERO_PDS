@@ -11,6 +11,7 @@ import os
 import shutil
 import datetime
 import logging
+from CheckConnection import CheckConnection
 from path_constants import fromASFK, fromPUDS, toBANK, logTo
 
 
@@ -52,6 +53,9 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.epdNight.log_str.connect(self.logining)
         self.epdDay.log_str.connect(self.logining)
         self.log_str.connect(self.logining)
+        self.checkConnection = CheckConnection()
+        self.checkConnection.setDaemon(True)
+        self.checkConnection.start()
 
     # Вывод информации на экран и логирование
     @QtCore.pyqtSlot(str, bool)
