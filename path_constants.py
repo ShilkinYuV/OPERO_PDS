@@ -14,8 +14,8 @@
 # decoderLogs = 'D:\\OEV\\Exg\\logs\\decod.log'
 
 
-fromASFK = 'D:\\isASFK'
-fromPUDS = 'D:\\isPUDS'
+fromASFK = 'x:\\OUT_OEBS\\4800\\044525000\\'
+fromPUDS = 'w:\\output'
 
 toASFK = 'x:\\IN_OEBS_BIK\\044525000'
 toPUDS = 'w:\\input'
