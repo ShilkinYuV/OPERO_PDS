@@ -4,7 +4,6 @@ from PyQt6.QtCore import QObject
 import os
 import shutil
 import datetime
-import logging
 from path_constants import fromBANK, toPUDS, toASFK, decoderPath, decoderLogs, fromBANKBuff, fromBankArhive
 
 
