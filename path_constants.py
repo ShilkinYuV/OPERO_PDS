@@ -26,5 +26,5 @@ fromBANKBuff = 'C:\\OEV\\Exg\\buff'
 fromBankArhive = 'C:\\MCI\\ARCHIVE'
 logTo = 'C:\\LOGS'
 
-decoderPath = 'C:\\OEV\\Exg\\unb64_rabis.exe'
+decoderPath = 'C:\\MCI\\batfile\\unb64_rabis.exe'
 decoderLogs = 'C:\\OEV\\Exg\\logs\\decod.log'

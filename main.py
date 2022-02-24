@@ -22,6 +22,7 @@ class OperoPDS(QtWidgets.QMainWindow):
         super(OperoPDS, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.mapping_network_drives()
         self.ui.textEdit.setReadOnly(True)
         currentDate = datetime.datetime.now()
         self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
@@ -56,6 +57,14 @@ class OperoPDS(QtWidgets.QMainWindow):
         self.checkConnection = CheckConnection()
         self.checkConnection.setDaemon(True)
         self.checkConnection.start()
+
+    def mapping_network_drives(self):
+        os.system('set trans_disk=x:')
+        os.system('set puds_disk=w:')
+        os.system('net use %trans_disk% /delete /y')
+        os.system('net use %puds_disk% /delete /y')
+        os.system('net use x: \\\\10.48.4.241\\transportbanks 1!QQww /USER:10.48.4.241\\svc95004800')
+        os.system('net use w: \\\\10.48.4.241\\transport 1!QQww /USER:10.48.4.241\\svc95004800')
 
     # Вывод информации на экран и логирование
     @QtCore.pyqtSlot(str, bool)
