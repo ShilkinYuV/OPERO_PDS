@@ -1,6 +1,6 @@
 
 from AboutWindow import Ui_aboutWindow
-from PyQt6 import QtWidgets
+from PyQt5 import QtWidgets
 import constants
 
 

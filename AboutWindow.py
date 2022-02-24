@@ -1,5 +1,5 @@
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 QtCore.QDir.addSearchPath('icons', 'assets/')
 
 class Ui_aboutWindow(object):
