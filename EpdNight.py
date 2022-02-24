@@ -2,8 +2,8 @@ from ast import Try
 import sys
 from threading import Thread
 from time import sleep
-from PyQt6 import QtWidgets, QtCore
-from PyQt6.QtCore import QObject
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QObject
 import os
 import shutil
 import datetime
@@ -173,11 +173,11 @@ class NightCicle(Thread):
             if not self.night.pressButton:
                 break
             self.current_time = datetime.datetime.now()
-            # if self.night.current_time > self.night.evening and self.night.current_time < self.night.tomorow_morning:
-            if True:
+            if self.night.current_time > self.night.evening and self.night.current_time < self.night.tomorow_morning:
+            # if True:
                 self.night.decodeFiles()
                 self.night.copyArhive()
-                # self.night.mapping_network_drives()
+                self.night.mapping_network_drives()
                 self.night.copyInASFKAndPUDS()
                 sleep(1800)
             else:

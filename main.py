@@ -1,6 +1,6 @@
 import sys
 
-from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from AboutForm import AboutForm
 from mainapp import Ui_MainWindow

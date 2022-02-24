@@ -1,6 +1,6 @@
 import sys
-from PyQt6 import QtWidgets, QtCore
-from PyQt6.QtCore import QObject
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QObject
 import os
 import shutil
 import datetime
@@ -23,7 +23,7 @@ class EpdDay(QObject):
         print('день')
         self.decodeFiles()
         self.copyArhive()
-        # self.mapping_network_drives()
+        self.mapping_network_drives()
         self.copyInASFKAndPUDS()
 
     # Расшифровка файлов
