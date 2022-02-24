@@ -25,6 +25,6 @@ class CheckConnection(Thread):
             logging.info('|' + datetime.datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S.%f") + '| CheckConnectionn')
 
-            self.mapping_network_drives()
+            # self.mapping_network_drives()
             shutil.copy2(logTo + '\\1\\' + currentDate.strftime("%Y%m%d") + '\\' + "sample.log", 'w:\\LOGS_FOR_SEND_MESSAGE')
             sleep(300)

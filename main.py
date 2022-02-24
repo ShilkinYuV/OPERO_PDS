@@ -22,7 +22,7 @@ class OperoPDS(QtWidgets.QMainWindow):
         super(OperoPDS, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.mapping_network_drives()
+        # self.mapping_network_drives()
         self.ui.textEdit.setReadOnly(True)
         currentDate = datetime.datetime.now()
         self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
@@ -111,43 +111,48 @@ class OperoPDS(QtWidgets.QMainWindow):
             files = os.listdir(currentdirs)
             for file in files:
                 myFile = currentdirs + '\\' + file
-                mydoc = minidom.parse(myFile)
-                items = mydoc.getElementsByTagName('sen:Object')
-                for elem in items:
-                    self.elementXML = str(elem.firstChild.data)
-                    if self.elementXML.__contains__(type):
-                        self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Начало копирования ' + file + ' в ' + self.inBANK, True)
-                        isEmpty = False
-                        try:
-                            shutil.copy2(myFile, self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"), True)
-                            self.log_str.emit('|'+datetime.datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' успешно завершено', True)
-                        except Exception:
-                            self.log_str.emit('|'+datetime.datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' не удалось', False)
-                        try:
-                            shutil.copy2(myFile, self.inBANK)
-                            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено', True)
-                        except Exception:
-                            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось', False)
+                if os.path.isfile(myFile):
+                    mydoc = minidom.parse(myFile)
+                    items = mydoc.getElementsByTagName('sen:Object')
+                    for elem in items:
+                        self.elementXML = str(elem.firstChild.data)
+                        if self.elementXML.__contains__(type):
+                            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Начало копирования ' + file + ' в ' + self.inBANK, True)
+                            isEmpty = False
+                            try:
+                                shutil.copy2(myFile, self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"))
+                                self.log_str.emit('|'+datetime.datetime.now().strftime(
+                                    "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' успешно завершено', True)
+                            except Exception:
+                                self.log_str.emit('|'+datetime.datetime.now().strftime(
+                                    "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' не удалось', False)
+                            try:
+                                shutil.copy2(myFile, self.inBANK)
+                                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено', True)
+                            except Exception:
+                                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось', False)
 
-                        arhivefiles = os.listdir(self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"))
-                        for arhive in arhivefiles:
-                            if arhive.__contains__(file):
-                                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")), True)
-                                chekArhive = True
+                            arhivefiles = os.listdir(self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"))
+                            for arhive in arhivefiles:
+                                myArhiveFile = self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d") + '\\' + arhive
+                                if os.path.isfile(myArhiveFile):
+                                    if arhive.__contains__(file):
+                                        self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")), True)
+                                        chekArhive = True
 
-                        bankfiles = os.listdir(self.inBANK)
-                        for bankfile in bankfiles:
-                            if bankfile.__contains__(file) and chekArhive:
-                                self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + self.inBANK, True)
-                                try:
-                                    os.remove(myFile)
-                                    self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' удален из ' + currentdirs, True)
-                                    chekArhive = False
-                                except:
-                                    self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Не удалось удалить ' + file + ' из ' + currentdirs, False)
-                                    chekArhive = False
+                            bankfiles = os.listdir(self.inBANK)
+                            for bankfile in bankfiles:
+                                MyBankFile = self.inBANK + '\\' + bankfile
+                                if os.path.isfile(MyBankFile):
+                                    if bankfile.__contains__(file) and chekArhive:
+                                        self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + self.inBANK, True)
+                                        try:
+                                            os.remove(myFile)
+                                            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' удален из ' + currentdirs, True)
+                                            chekArhive = False
+                                        except:
+                                            self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Не удалось удалить ' + file + ' из ' + currentdirs, False)
+                                            chekArhive = False
 
         if isEmpty:
             sender = self.sender()
@@ -160,35 +165,35 @@ class OperoPDS(QtWidgets.QMainWindow):
         isEmpty = True
         for currentdirs in dirsASFKPUDS:
             files = os.listdir(currentdirs)
-
             for file in files:
                 myFile = currentdirs + '\\' + file
-                mydoc = minidom.parse(myFile)
-                items = mydoc.getElementsByTagName('sen:Object')
+                if os.path.isfile(myFile):
+                    mydoc = minidom.parse(myFile)
+                    items = mydoc.getElementsByTagName('sen:Object')
 
-                for elem in items:
-                    self.elementXML = str(elem.firstChild.data)
-                    if self.elementXML.__contains__(self.OTVSEND):
-                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' OTVSEND ' + file)
-                        isEmpty = False
-                    elif self.elementXML.__contains__(self.OTVSEND):
-                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' OTZVSEND ' + file)
-                        isEmpty = False
-                    elif self.elementXML.__contains__(self.PESSEND):
-                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' PESSEND ' + file)
-                        isEmpty = False
-                    elif self.elementXML.__contains__(self.RNPSEND):
-                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' RNPSEND ' + file)
-                        isEmpty = False
-                    elif self.elementXML.__contains__(self.ZINFSEND):
-                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZINFSEND ' + file)
-                        isEmpty = False
-                    elif self.elementXML.__contains__(self.ZONDSEND):
-                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZONDSEND ' + file)
-                        isEmpty = False
-                    elif self.elementXML.__contains__(self.ZVPSEND):
-                        self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZVPSEND ' + file)
-                        isEmpty = False
+                    for elem in items:
+                        self.elementXML = str(elem.firstChild.data)
+                        if self.elementXML.__contains__(self.OTVSEND):
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' OTVSEND ' + file)
+                            isEmpty = False
+                        elif self.elementXML.__contains__(self.OTVSEND):
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' OTZVSEND ' + file)
+                            isEmpty = False
+                        elif self.elementXML.__contains__(self.PESSEND):
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' PESSEND ' + file)
+                            isEmpty = False
+                        elif self.elementXML.__contains__(self.RNPSEND):
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' RNPSEND ' + file)
+                            isEmpty = False
+                        elif self.elementXML.__contains__(self.ZINFSEND):
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZINFSEND ' + file)
+                            isEmpty = False
+                        elif self.elementXML.__contains__(self.ZONDSEND):
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZONDSEND ' + file)
+                            isEmpty = False
+                        elif self.elementXML.__contains__(self.ZVPSEND):
+                            self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ZVPSEND ' + file)
+                            isEmpty = False
 
         if isEmpty:
             self.ui.textEdit.append(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' Корневые каталоги не содержат файлов')
