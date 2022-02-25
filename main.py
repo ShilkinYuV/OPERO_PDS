@@ -1,6 +1,7 @@
 import sys
 
 from PyQt5 import QtWidgets, QtCore, QtGui
+import ctypes, sys
 
 from AboutForm import AboutForm
 from mainapp import Ui_MainWindow
@@ -25,8 +26,8 @@ class OperoPDS(QtWidgets.QMainWindow):
         # self.mapping_network_drives()
         self.ui.textEdit.setReadOnly(True)
         currentDate = datetime.datetime.now()
-        self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
-        self.isASFKArhive = fromASFK + '\\' + str(1)
+        self.isASFK = fromASFK + '\\' + currentDate.strftime("%d%m%Y")
+        self.isASFKArhive = self.isASFK + '\\' + str(1)
         self.isPUDS = fromPUDS + '\\' + currentDate.strftime("%Y%m%d")
         self.inBANK = toBANK
         self.LOGS = logTo
@@ -82,8 +83,9 @@ class OperoPDS(QtWidgets.QMainWindow):
         # обновление имен каталого в наименованием текущей даты
     def updateDates(self):
         currentDate = datetime.datetime.now()
-        self.isASFK = fromASFK + '\\' + currentDate.strftime("%Y%m%d")
+        self.isASFK = fromASFK + '\\' + currentDate.strftime("%d%m%Y")
         self.isPUDS = fromPUDS + '\\' + currentDate.strftime("%Y%m%d")
+        self.isASFKArhive = self.isASFK + '\\' + str(1)
 
     # Проверка существуют ли каталоги, если не существуют то каталоги создаются
     def chekdirs(self):
@@ -95,8 +97,8 @@ class OperoPDS(QtWidgets.QMainWindow):
             os.makedirs(self.isASFK)
         if not os.path.exists(self.isPUDS):
             os.makedirs(self.isPUDS)
-        if not os.path.exists(self.isASFKArhive + '\\' + currentDate.strftime("%Y%m%d")):
-            os.makedirs(self.isASFKArhive + '\\' + currentDate.strftime("%Y%m%d"))
+        if not os.path.exists(self.isASFKArhive):
+            os.makedirs(self.isASFKArhive)
 
     def clearWindow(self):
         self.ui.textEdit.clear()
@@ -120,24 +122,24 @@ class OperoPDS(QtWidgets.QMainWindow):
                             self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Начало копирования ' + file + ' в ' + self.inBANK, True)
                             isEmpty = False
                             try:
-                                shutil.copy2(myFile, self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"))
+                                shutil.copy2(myFile, self.isASFKArhive)
                                 self.log_str.emit('|'+datetime.datetime.now().strftime(
-                                    "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' успешно завершено', True)
+                                    "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive ) + ' успешно завершено', True)
                             except Exception:
                                 self.log_str.emit('|'+datetime.datetime.now().strftime(
-                                    "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")) + ' не удалось', False)
+                                    "%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + (self.isASFKArhive) + ' не удалось', False)
                             try:
                                 shutil.copy2(myFile, self.inBANK)
                                 self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' успешно завершено', True)
                             except Exception:
                                 self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Копирование ' + file + ' из ' + currentdirs + ' в ' + self.inBANK + ' не удалось', False)
 
-                            arhivefiles = os.listdir(self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d"))
+                            arhivefiles = os.listdir(self.isASFKArhive)
                             for arhive in arhivefiles:
-                                myArhiveFile = self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d") + '\\' + arhive
+                                myArhiveFile = self.isASFKArhive + '\\' + arhive
                                 if os.path.isfile(myArhiveFile):
                                     if arhive.__contains__(file):
-                                        self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + (self.isASFKArhive + '\\' + datetime.datetime.now().strftime("%Y%m%d")), True)
+                                        self.log_str.emit('|'+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '| Файл ' + file + ' присутствует в ' + (self.isASFKArhive), True)
                                         chekArhive = True
 
                             bankfiles = os.listdir(self.inBANK)
@@ -206,6 +208,6 @@ class OperoPDS(QtWidgets.QMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
     application = OperoPDS()
-    application.show()
-
+    application.show()    
     sys.exit(app.exec())
+
