@@ -57,8 +57,7 @@ class EpdNight(QObject):
         count_files_before = len(countFiles)
         print(count_files_before)
         # Декодирование
-        command = '{decoderPath} *.* {fromBANKBuff} >> {decoderLogs}'.format(fromBANK=fromBANK,
-                                                                                            decoderPath=decoderPath,
+        command = '{decoderPath} *.* {fromBANKBuff} >> {decoderLogs}'.format( decoderPath=decoderPath,
                                                                                             decoderLogs=decoderLogs,
                                                                                             fromBANKBuff=fromBANKBuff)
         try:
@@ -88,7 +87,7 @@ class EpdNight(QObject):
     # Копирование в архивные папки
     def copyArhive(self):
         current_date_arhive_directory_ed = fromBankArhive + '\\' + datetime.datetime.now().strftime(
-            "%Y%m%d") + '\\uarm3\\\inc\\ed'
+            "%d.%m.%Y") + '\\uarm3\\\inc\\ed'
         typefiles = os.listdir(fromBANKBuff)
         for file in typefiles:
             MyFile = fromBANKBuff + '\\' + file
@@ -169,8 +168,8 @@ class EpdNight(QObject):
                             doClear = True
                 if doClear:
                     try:
-                        shutil.copy2(myFile, fromBANKBuff + '\\' + '1')
-                        if file in os.listdir(fromBANKBuff + '\\' + '1'):
+                        shutil.copy2(myFile, fromBANK + '\\' + '1')
+                        if file in os.listdir(fromBANK + '\\' + '1'):
                             if myFile.__contains__(file):
                                 os.remove(myFile)
                     except Exception:
@@ -200,7 +199,7 @@ class NightCicle(Thread):
             # if True:
                 self.night.decodeFiles()
                 self.night.copyArhive()
-                # self.night.mapping_network_drives()
+                self.night.mapping_network_drives()
                 self.night.copyInASFKAndPUDS()
                 sleep(1800)
             else:
