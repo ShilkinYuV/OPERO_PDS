@@ -6,5 +6,7 @@ arm_buf = dir_armkbr + "\\exg\\bufer"
 
 unb64_rabis = "A:\\MCI\\batfile\\unb64_rabis.exe"
 
+CLI = dir_armkbr + "\\Exg\\cli"
+
 trans_disk = "x:\\"
 puds_disk = "w:\\"

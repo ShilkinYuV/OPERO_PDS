@@ -13,8 +13,7 @@ class Logger:
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         if isError:
-            pass
+            self.form_log.append("<font color='red'>{date} {message}</font>".format(date=current_datetime, message=message))
         else:
-            pass
+            self.form_log.append("<font color='white'>{date} {message}</font>".format(date=current_datetime, message=message))
 
-        self.form_log.append(current_datetime + " " + message)

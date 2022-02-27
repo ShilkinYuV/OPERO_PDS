@@ -124,7 +124,25 @@ class FileExplorer:
             )
 
     def decode_files(self, decoder, arm_buf, dir_log):
-        pass
+        """Расшифровка файлов по указанному пути, с проверкой"""
+        count_before = self.count_files_in_folder(arm_buf)
+
+        os.system(
+                "{decoder} *.* {buffer}\ {buffer}\ >> {logs}\decod.log".format(
+                    decoder=decoder, buffer=arm_buf, logs=dir_log
+                )
+        )
+
+        count_after = self.count_files_in_folder(arm_buf)
+
+        if count_before == count_after - count_before:
+            self.log("Все файлы успешно расшифрованы - {}".format(count_before))
+
+        else:
+            undecode_count = count_before - (count_after - count_before)
+            self.log("Ошибка расшифровки! Из {} расшифровано {}.".format(count_before,undecode_count))
+
+
 
     def check_move_or_copy_files(self, listdir_from, path_to):
         """Проверка переместились ли файлы в нужную дерикторию"""
@@ -138,7 +156,7 @@ class FileExplorer:
                 # self.logger.log("{file_name} не переместился в " + path_to,isError=True)
 
         if count == 0:
-            self.log("Все файлы успешно перемещены/скопированы")
+            self.log("Все файлы успешно перемещены/скопированы {}".format(len(listdir_from)))
 
         else:
             self.log(
