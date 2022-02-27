@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icon/bank.png</file>
+    <file>icon/check.png</file>
+    <file>icon/clear.png</file>
+    <file>icon/code.png</file>
+    <file>icon/copy.png</file>
+  </qresource>
+</RCC>
