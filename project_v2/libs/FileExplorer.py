@@ -6,8 +6,7 @@ from xml.dom import minidom
 
 class FileExplorer:
     def __init__(self, _logger=None):
-        if _logger is not None:
-            self.logger = _logger
+        self.logger = _logger
 
     def check_dir(self, path):
         """Проверка наличия директории и создание ее в случае отсутствия"""

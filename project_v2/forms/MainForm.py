@@ -17,7 +17,7 @@ from contants.path_constants import (
 )
 from contants.doc_types import doc_types
 from libs.FileExplorer import FileExplorer
-from libs.Logger import Logger
+from libs.Logger import Logger, CheckConnection
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -40,8 +40,16 @@ class MainForm(QtWidgets.QMainWindow):
         self.about_form = None
         self.ui.pushButton_2.clicked.connect(self.open_about_form)
 
-        self.logger = Logger(form_log_path=self.ui.textEdit)
+        self.logger = Logger(file_log_path=dir_log,form_log_path=self.ui.textEdit)
+        
+        self.check_connection()
 
+    def check_connection(self):
+        """Проверка соединения"""
+        self.check_conn = CheckConnection(dir_log, _logger=self.logger)
+        self.check_conn.setDaemon(True)
+        # self.check_conn.log_str.connect(self.logger.log)
+        self.check_conn.start()
 
     def open_about_form(self):
         self.about_form = AboutForm()
