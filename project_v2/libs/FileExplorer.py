@@ -2,24 +2,34 @@ import os
 import re
 import shutil
 from xml.dom import minidom
+from PyQt5 import QtWidgets, QtCore, QtGui
 
-
-class FileExplorer:
+class FileExplorer(QtCore.QObject):
+    log_str = QtCore.pyqtSignal(str, bool, bool)
+    
     def __init__(self, _logger=None):
-        if _logger is not None:
-            self.logger = _logger
+        super(FileExplorer, self).__init__()
+        self.logger = _logger
 
     def check_dir(self, path):
         """Проверка наличия директории и создание ее в случае отсутствия"""
         if not os.path.exists(path=path):
             os.makedirs(path)
 
-    def count_files_in_folder(self, path):
+    def count_files_in_folder(self, path, filter=None):
         """Вывод количества файлов по указанному пути"""
+
+        if filter is not None:
+            regular = re.compile(filter)
+
         count = 0
         for file_name in os.listdir(path=path):
             if os.path.isfile(path + "\\" + file_name):
-                count += 1
+                if filter is not None:
+                    if regular.search(file_name.lower()) is not None:
+                        count += 1
+                else:
+                    count += 1
 
         return count
 
@@ -29,6 +39,7 @@ class FileExplorer:
 
         if filter is not None:
             regular = re.compile(filter)
+            print(filter)
 
         message = "Непредвиденная ошибка при перемещении файлов в " + path_to
 
@@ -49,7 +60,6 @@ class FileExplorer:
                         shutil.move(path_from + "\\" + file_name, path_to)
                     except Exception as ex:
                         self.log(message, True)
-
 
         # Проверка, переместились ли файлы
         self.check_move_or_copy_files(listdir, path_to)
@@ -160,29 +170,37 @@ class FileExplorer:
 
     def check_move_or_copy_files(self, listdir_from, path_to):
         """Проверка переместились ли файлы в нужную дерикторию"""
-        move_to_listdir = os.listdir(path=path_to)
-        count = 0
-        for file_name in listdir_from:
-            try:
-                move_to_listdir.index(file_name)
-            except ValueError as ex:
-                count += 1
-                # self.logger.log("{file_name} не переместился в " + path_to,isError=True)
+        if len(listdir_from) != 0:
+            move_to_listdir = os.listdir(path=path_to)
+            count = 0
+            for file_name in listdir_from:
+                try:
+                    move_to_listdir.index(file_name)
+                except ValueError as ex:
+                    count += 1
+                    # self.logger.log("{file_name} не переместился в " + path_to,isError=True)
 
-        if count == 0:
-            self.log(
-                "Все файлы успешно перемещены/скопированы {}".format(len(listdir_from))
-            )
+            if count == 0:
+                self.log(
+                    "Все файлы успешно перемещены/скопированы {}".format(
+                        len(listdir_from)
+                    )
+                )
+
+            else:
+                self.log(
+                    "Не удалось переместить/скопировать {count} файлов".format(
+                        count=count
+                    ),
+                    isError=True,
+                )
 
         else:
-            self.log(
-                "Не удалось переместить/скопировать {count} файлов".format(count=count),
-                isError=True,
-            )
+            self.log("Нет файлов для отправки!")
 
     def log(self, message, isError=False):
         if self.logger is not None:
-            self.logger.log(message, isError=isError)
+            self.log_str.emit(message, False , isError)
         else:
             print(message)
 
@@ -208,10 +226,10 @@ class FileExplorer:
 
     def check_dirs_for_send_docs(self, rnp_folders, rnp_doc_types, dir_armkbrn):
         """Проверка наличия документов на отправку"""
-        
+
         isEmpty = True
         print(rnp_doc_types)
-        for k,v in rnp_doc_types.items():
+        for k, v in rnp_doc_types.items():
             count = 0
             for folder in rnp_folders:
                 self.check_dir(folder)
@@ -223,10 +241,12 @@ class FileExplorer:
                         for elem in items:
                             self.elementXML = str(elem.firstChild.data)
                             if self.elementXML.__contains__(v):
-                                    isEmpty = False
-                                    count+=1
+                                isEmpty = False
+                                count += 1
             if count != 0:
-                self.log("Найдены документы типа - {}, в количестве {}".format(k, count))
+                self.log(
+                    "Найдены документы типа - {}, в количестве {}".format(k, count)
+                )
 
         count = self.count_files_in_folder(dir_armkbrn)
         if count != 0:
@@ -234,4 +254,4 @@ class FileExplorer:
             self.log("Найдены документы для отправки ЭПД в количестве {}".format(count))
 
         if isEmpty:
-            self.log("Документов для отправки не найдено") 
+            self.log("Документов для отправки не найдено")
