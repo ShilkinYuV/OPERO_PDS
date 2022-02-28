@@ -15,6 +15,7 @@ from contants.path_constants import (
     puds_disk,
     CLI
 )
+from contants.doc_types import doc_types
 from libs.FileExplorer import FileExplorer
 from libs.Logger import Logger
 
@@ -26,27 +27,21 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.ui.textEdit.setReadOnly(True)
         self.ui.day.clicked.connect(self.epd_day_start)
+        self.ui.chekDocuments.clicked.connect(self.check_dirs)
         
-        self.OTVSEND = 'RDI0NCB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI'
-        self.OTZVSEND = 'RDI3NSB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI'
-        self.PESSEND = 'YWNrZXRFSUQgeG1sbnM9InVybjpjYnItcnU6ZWQ6djIuMCIgRURObz0i'
-        self.RNPSEND = 'YWNrZXRFUEQgeG1sbnM9InVybjpjYnItcnU6ZWQ6djIuMCIgRURObz0i'
-        self.ZINFSEND = 'RDI0MCBFREF1dGhvcj0i'
-        self.ZONDSEND = 'RDk5OSBDcmVhdGlvbkRhdGVUaW1l'
-        self.ZVPSEND = 'RDIxMCB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI'
-
-        self.ui.OTVSEND.clicked.connect(lambda: self.send_docs(self.OTVSEND))
-        self.ui.OTZVSEND.clicked.connect(lambda: self.send_docs(self.OTZVSEND))
-        self.ui.PESSEND.clicked.connect(lambda: self.send_docs(self.PESSEND))
-        self.ui.RNPSEND.clicked.connect(lambda: self.send_docs(self.RNPSEND))
-        self.ui.ZINFSEND.clicked.connect(lambda: self.send_docs(self.ZINFSEND))
-        self.ui.ZONDSEND.clicked.connect(lambda: self.send_docs(self.ZONDSEND))
-        self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(self.ZVPSEND))
+        self.ui.OTVSEND.clicked.connect(lambda: self.send_docs(doc_types['OTVSEND']))
+        self.ui.OTZVSEND.clicked.connect(lambda: self.send_docs(doc_types['OTZVSEND']))
+        self.ui.PESSEND.clicked.connect(lambda: self.send_docs(doc_types['PESSEND']))
+        self.ui.RNPSEND.clicked.connect(lambda: self.send_docs(doc_types['RNPSEND']))
+        self.ui.ZINFSEND.clicked.connect(lambda: self.send_docs(doc_types['ZINFSEND']))
+        self.ui.ZONDSEND.clicked.connect(lambda: self.send_docs(doc_types['ZONDSEND']))
+        self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(doc_types['ZVPSEND']))
 
         self.about_form = None
         self.ui.pushButton_2.clicked.connect(self.open_about_form)
 
         self.logger = Logger(form_log_path=self.ui.textEdit)
+
 
     def open_about_form(self):
         self.about_form = AboutForm()
@@ -94,48 +89,37 @@ class MainForm(QtWidgets.QMainWindow):
 
 
     def send_docs(self, rnp):
-        
+        """Отправка определенных документов выбираемых на RNP"""
         file_explorer = FileExplorer(_logger=self.logger)
 
         current_date = datetime.now().strftime("%d%m%Y")
 
         vchera = trans_disk + "\\OUT_OEBS\\4800\\044525000\\" + current_date
-        odin = vchera + "\\1"
 
         file_explorer.check_dir(vchera)
-        file_explorer.check_dir(odin)
 
         vcheran = trans_disk + "\\OUT_OEBS\\4800\\004525987\\" + current_date
-        odinn = vcheran + "\\1"
 
         file_explorer.check_dir(vcheran)
-        file_explorer.check_dir(odinn)
               
         count = 0      
 
-        for file_name in os.listdir(vchera):
-            file_path = vchera + "\\" + file_name
-            if os.path.isfile(file_path):
-                    mydoc = minidom.parse(file_path)
-                    items = mydoc.getElementsByTagName('sen:Object')
-                    for elem in items:
-                        self.elementXML = str(elem.firstChild.data)
-                        if self.elementXML.__contains__(rnp):
-                            file_explorer.copy_files(vchera, odin, filter=file_name.lower())
-                            count+=1
-
-        for file_name in os.listdir(vcheran):
-            file_path = vcheran + "\\" + file_name
-            if os.path.isfile(file_path):
-                    mydoc = minidom.parse(file_path)
-                    items = mydoc.getElementsByTagName('sen:Object')
-                    for elem in items:
-                        self.elementXML = str(elem.firstChild.data)
-                        if self.elementXML.__contains__(rnp):
-                            file_explorer.copy_files(vcheran, odinn, filter=file_name.lower())
-                            count+=1
+        count += file_explorer.check_dir_for_docs(rnp=rnp, path_from=vchera, path_to=CLI)
+        count += file_explorer.check_dir_for_docs(rnp=rnp, path_from=vcheran, path_to=CLI)
 
         if count == 0:
             sender = self.sender()
             self.logger.log("Не найдено ни одного документа {}".format(sender.text()))
         
+
+    def check_dirs(self):
+        """Проверка директорий на наличие файлов"""
+        file_explorer = FileExplorer(_logger=self.logger)
+
+        current_date = datetime.now().strftime("%d%m%Y")
+
+        vchera = trans_disk + "\\OUT_OEBS\\4800\\044525000\\" + current_date
+        vcheran = trans_disk + "\\OUT_OEBS\\4800\\004525987\\" + current_date
+
+        file_explorer.check_dirs_for_send_docs(rnp_folders=[vchera,vcheran], rnp_doc_types=doc_types,dir_armkbrn=(dir_armkbr + "\\exg\\rcv"))
+
