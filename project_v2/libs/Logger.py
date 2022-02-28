@@ -27,7 +27,7 @@ class Logger(QtCore.QObject):
         if self.file_log_path != None:
             logging.basicConfig(filename=file_log_path + '\\1\\' + datetime.now().strftime("%Y%m%d") + '\\' + "sample.log", level=logging.INFO)
 
-    # @QtCore.pyqtSlot(str, bool)
+
     def log(self, message, isError=False, onlyInFile=False):
         """Функция логирования, со своими фичами"""
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -79,6 +79,6 @@ class CheckConnection(Thread):
                 else:
                     fe.copy_files(path_from=curr_log, path_to=puds_disk + 'LOGS_FOR_SEND_MESSAGE\\'+ currentDate.strftime("%Y%m%d") + '\\')
                
-                sleep(15)
+                sleep(240)
                 
 
