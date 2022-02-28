@@ -1,0 +1,9 @@
+doc_types = {
+    'OTVSEND': 'RDI0NCB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI',
+    'OTZVSEND':'RDI3NSB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI',
+    'PESSEND':'YWNrZXRFSUQgeG1sbnM9InVybjpjYnItcnU6ZWQ6djIuMCIgRURObz0i',
+    'RNPSEND':'YWNrZXRFUEQgeG1sbnM9InVybjpjYnItcnU6ZWQ6djIuMCIgRURObz0i',
+    'ZINFSEND':'RDI0MCBFREF1dGhvcj0i',
+    'ZONDSEND':'RDk5OSBDcmVhdGlvbkRhdGVUaW1l',
+    'ZVPSEND':'RDIxMCB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI',
+}
