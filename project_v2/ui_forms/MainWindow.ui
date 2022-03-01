@@ -13,8 +13,14 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/icon/bank.ico</normaloff>:/icon/bank.ico</iconset>
+  </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(45, 59, 68);</string>
+   <string notr="true">background-color: rgb(45, 59, 68);
+color: white;
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
@@ -89,7 +95,7 @@ background-color: #364752;
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap>icon/bank.png</pixmap>
+             <pixmap resource="icons.qrc">:/icon/bank.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>false</bool>
@@ -242,8 +248,8 @@ border-radius: 5px;
              <string>Проверить документы</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/check.png</normaloff>icon/check.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/check.png</normaloff>:/icon/check.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -265,8 +271,8 @@ border-radius: 5px;
              <string>PESSEND</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -288,8 +294,8 @@ border-radius: 5px;
              <string>ZVPSEND</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -311,8 +317,8 @@ border-radius: 5px;
              <string>ZINFSEND</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -334,8 +340,8 @@ border-radius: 5px;
              <string>ZONDSEND</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -357,8 +363,8 @@ border-radius: 5px;
              <string>OTZVSEND</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -380,8 +386,8 @@ border-radius: 5px;
              <string>RNPSEND</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -406,8 +412,8 @@ border-radius: 5px;
              <string>OTVSEND</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/copy.png</normaloff>icon/copy.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/copy.png</normaloff>:/icon/copy.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -442,8 +448,8 @@ border-radius: 5px;
              <string>ЭПД день</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/code.png</normaloff>icon/code.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/code.png</normaloff>:/icon/code.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -465,8 +471,8 @@ border-radius: 5px;
              <string>ЭПД ночь</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/code.png</normaloff>icon/code.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/code.png</normaloff>:/icon/code.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -501,8 +507,8 @@ border-radius: 5px;
              <string/>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>icon/clear.png</normaloff>icon/clear.png</iconset>
+             <iconset resource="icons.qrc">
+              <normaloff>:/icon/clear.png</normaloff>:/icon/clear.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -590,7 +596,7 @@ border-radius: 5px;
   </action>
  </widget>
  <resources>
-  <include location="resource.qrc"/>
+  <include location="icons.qrc"/>
  </resources>
  <connections/>
 </ui>

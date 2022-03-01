@@ -33,7 +33,7 @@ class FileExplorer(QtCore.QObject):
 
         return count
 
-    def move_files(self, path_from, path_to, filter=None):
+    def move_files(self, path_from, path_to, filter=None, name_of_doc='все'):
         """Перемещение файлов из одного пути в другой, с проверкой наличия в новой директории"""
         self.check_dir(path_to)
 
@@ -65,28 +65,28 @@ class FileExplorer(QtCore.QObject):
         count = self.check_move_or_copy_files(listdir, path_from, path_to)
         if count == 0:
             self.log(
-                "Все файлы успешно в количестве {} перемещены из [{}] в [{}]".format(
-                    len(listdir), path_from, path_to
+                "Все файлы [{}] в количестве {} успешно перемещены из [{}] в [{}]".format(
+                    name_of_doc,len(listdir), path_from, path_to
                 )
             )
 
         elif count is None:
             self.log(
-                "Нет файлов для перемещения с масокй [{}] из [{}] в [{}]".format(
-                    filter,path_from, path_to
+                "Нет файлов [{}] для перемещения из [{}] в [{}]".format(
+                    name_of_doc ,path_from, path_to
                 ),
                 isError=False,
             )
 
         else:
             self.log(
-                "Не удалось переместить {} файлов из [{}] в [{}]".format(
-                    count, path_from, path_to
+                "Не удалось переместить {} файлов [{}] из [{}] в [{}]".format(
+                    count, name_of_doc, path_from, path_to
                 ),
                 isError=True,
             )
 
-    def copy_files(self, path_from, path_to, filter=None):
+    def copy_files(self, path_from, path_to, filter=None, name_of_doc='все'):
         """Копирование файлов из одной директории в другую.
         Используя регулярное (filter) выражение, можно скопировать определенные файлы"""
         self.check_dir(path_to)
@@ -118,27 +118,27 @@ class FileExplorer(QtCore.QObject):
         count = self.check_move_or_copy_files(listdir, path_from, path_to)
         if count == 0:
             self.log(
-                "Все файлы успешно в количестве {} скопированы из [{}] в [{}]".format(
-                    len(listdir), path_from, path_to
+                "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
+                    name_of_doc, len(listdir), path_from, path_to
                 )
             )
         elif count is None:
             self.log(
-                "Нет файлов для копирования с маской [{}] из [{}] в [{}]".format(
-                    filter,path_from, path_to
+                "Нет файлов [{}] для копирования из [{}] в [{}]".format(
+                    name_of_doc,path_from, path_to
                 ),
                 isError=False,
             )
 
         else:
             self.log(
-                "Не удалось скопировать {} файлов из [{}] в [{}]".format(
-                    count, path_from, path_to
+                "Не удалось скопировать {} файлов [{}] из [{}] в [{}]".format(
+                    count, name_of_doc, path_from, path_to
                 ),
                 isError=True,
             )
 
-    def delete_files(self, path_from, filter=None):
+    def delete_files(self, path_from, filter=None, name_of_doc=''):
         """Удаление файлов из директории.
         Используя регулярное (filter) выражение, можно удалить определенные файлы"""
 

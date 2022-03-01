@@ -56,22 +56,22 @@ class NightCicle(QThread):
 
                     self.file_explorer.check_dir(arc_dir)
 
-                    self.file_explorer.copy_files(arm_buf, arc_dir, r".*\.ed\.xml")
-                    self.file_explorer.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml")
+                    self.file_explorer.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='.ed.xml')
+                    self.file_explorer.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='e211.ed.xml')
 
                     trans_disk_path = trans_disk + "IN_OEBS_BIK\\044525000"
 
-                    self.file_explorer.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml")
+                    self.file_explorer.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml$", name_of_doc='.ed.xml')
                     self.file_explorer.copy_files(
-                        arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml"
+                        arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.ed.xml'
                     )
 
-                    self.file_explorer.copy_files(arm_buf, puds_disk + "input", r".*\.ed")
+                    self.file_explorer.copy_files(arm_buf, puds_disk + "input", r".*\.ed$", name_of_doc='.ed')
                     self.file_explorer.copy_files(
-                        arm_buf, puds_disk + "input", r".*ed211.*\.eds"
+                        arm_buf, puds_disk + "input", r".*ed211.*\.eds", name_of_doc='.ed211.eds'
                     )
 
-                    self.file_explorer.delete_files(arm_buf, r".*\.xml")
+                    self.file_explorer.delete_files(arm_buf, r".*\.xml$", name_of_doc='.xml')
 
                     self.file_explorer.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
 
