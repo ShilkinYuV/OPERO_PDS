@@ -4,9 +4,10 @@ import shutil
 from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+
 class FileExplorer(QtCore.QObject):
     log_str = QtCore.pyqtSignal(str, bool, bool)
-    
+
     def __init__(self, _logger=None):
         super(FileExplorer, self).__init__()
         self.logger = _logger
@@ -62,7 +63,21 @@ class FileExplorer(QtCore.QObject):
                         self.log(message, True)
 
         # Проверка, переместились ли файлы
-        self.check_move_or_copy_files(listdir, path_to)
+        count = self.check_move_or_copy_files(listdir, path_from, path_to)
+        if count == 0:
+            self.log(
+                "Все файлы успешно в количестве {} перемещены из [{}] в [{}]".format(
+                    len(listdir), path_from, path_to
+                )
+            )
+
+        else:
+            self.log(
+                "Не удалось переместить {} файлов из {} в {}".format(
+                    count, path_from, path_to
+                ),
+                isError=True,
+            )
 
     def copy_files(self, path_from, path_to, filter=None):
         """Копирование файлов из одной директории в другую.
@@ -93,7 +108,21 @@ class FileExplorer(QtCore.QObject):
                         self.log(message, True)
 
         # Проверка, скопировались ли файлы
-        self.check_move_or_copy_files(listdir, path_to)
+        count = self.check_move_or_copy_files(listdir, path_from, path_to)
+        if count == 0:
+            self.log(
+                "Все файлы успешно в количестве {} скопированы из [{}] в [{}]".format(
+                    len(listdir), path_from, path_to
+                )
+            )
+
+        else:
+            self.log(
+                "Не удалось скопировать {} файлов из {} в {}".format(
+                    count, path_from, path_to
+                ),
+                isError=True,
+            )
 
     def delete_files(self, path_from, filter=None):
         """Удаление файлов из директории.
@@ -163,12 +192,13 @@ class FileExplorer(QtCore.QObject):
         else:
             undecode_count = count_before - (count_after - count_before)
             self.log(
-                "Ошибка расшифровки! Из {} расшифровано {}.".format(
+                "Ошибка расшифровки! Из {} не расшифровано {}.".format(
                     count_before, undecode_count
-                )
+                ),
+                isError=False,
             )
 
-    def check_move_or_copy_files(self, listdir_from, path_to):
+    def check_move_or_copy_files(self, listdir_from, path_from, path_to):
         """Проверка переместились ли файлы в нужную дерикторию"""
         if len(listdir_from) != 0:
             move_to_listdir = os.listdir(path=path_to)
@@ -178,29 +208,30 @@ class FileExplorer(QtCore.QObject):
                     move_to_listdir.index(file_name)
                 except ValueError as ex:
                     count += 1
-                    # self.logger.log("{file_name} не переместился в " + path_to,isError=True)
 
             if count == 0:
-                self.log(
-                    "Все файлы успешно перемещены/скопированы {}".format(
-                        len(listdir_from)
-                    )
-                )
+                return count
+                # self.log(
+                #     "Все файлы успешно перемещены/скопированы {} из [{}] в [{}]".format(
+                #         len(listdir_from), path_from, path_to
+                #     )
+                # )
 
             else:
-                self.log(
-                    "Не удалось переместить/скопировать {count} файлов".format(
-                        count=count
-                    ),
-                    isError=True,
-                )
+                return count
+                # self.log(
+                #     "Не удалось переместить/скопировать {} файлов из {} в {}".format(
+                #         count, path_from, path_to
+                #     ),
+                #     isError=True,
+                # )
 
-        else:
-            self.log("Нет файлов для отправки!")
+        # else:
+        #     self.log("Нет !")
 
     def log(self, message, isError=False):
         if self.logger is not None:
-            self.log_str.emit(message, False , isError)
+            self.log_str.emit(message, False, isError)
         else:
             print(message)
 

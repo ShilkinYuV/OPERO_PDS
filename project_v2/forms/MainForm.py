@@ -30,6 +30,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.day.clicked.connect(self.epd_day_start)
         self.ui.chekDocuments.clicked.connect(self.check_dirs)
         self.ui.night.clicked.connect(self.epd_night)
+        self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
 
         self.ui.OTVSEND.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"]))
         self.ui.OTZVSEND.clicked.connect(lambda: self.send_docs(doc_types["OTZVSEND"]))
@@ -48,6 +49,33 @@ class MainForm(QtWidgets.QMainWindow):
         self.night_thread = None
 
         self.check_connection()
+        self.read_local_log()
+
+    def read_local_log(self):
+        """Чтение лога, при наличии и вывод в визуальную форму"""
+        path = dir_log + '\\1\\' + datetime.now().strftime("%Y%m%d") + '\\' + "sample.log"
+        if os.path.isfile(path):
+            log = open(path, 'r')
+            num_lines = sum(1 for line in open(path))
+            if num_lines == 0:
+                self.ui.textEdit.append('По пути "{}" пустой лог '.format(path))
+            else:
+                print('start loop')
+                for line in log:
+                    # Делим строчку лога на тип, дату и сообщение
+                    splitted = line.split('|')
+                    type = splitted[0]
+                    date_time = splitted[1].replace(splitted[1][19:26],"")
+                    message = splitted[2]
+
+                    if type.__contains__('ERROR') and not message.__contains__('CheckConnection'):
+                        self.ui.textEdit.append("<font color='red'>{date} {message}</font>".format(date=date_time, message=message))
+                    
+                    elif type.__contains__('INFO') and not message.__contains__('CheckConnection'):
+                        self.ui.textEdit.append("<font color='white'>{date} {message}</font>".format(date=date_time, message=message))
+                        
+        else:
+            self.ui.textEdit.append('По пути "{}" отсутствует лог '.format(path))
 
     def check_connection(self):
         """Проверка соединения"""
@@ -60,46 +88,46 @@ class MainForm(QtWidgets.QMainWindow):
         self.about_form = AboutForm()
         self.about_form.show()
 
-    def epd_day_start(self):
+    # def epd_day_start(self):
 
-        file_explorer = FileExplorer(_logger=self.logger)
-        file_explorer.log_str.connect(self.log)
-        file_explorer.check_dir(dir_log)
-        file_explorer.check_dir(dir_armkbr + "\\exg\\rcv")
+    #     file_explorer = FileExplorer(_logger=self.logger)
+    #     file_explorer.log_str.connect(self.log)
+    #     file_explorer.check_dir(dir_log)
+    #     file_explorer.check_dir(dir_armkbr + "\\exg\\rcv")
 
-        current_date = datetime.now().strftime("%d.%m.%Y")
+    #     current_date = datetime.now().strftime("%d.%m.%Y")
 
-        if file_explorer.count_files_in_folder(dir_armkbr + "\\exg\\rcv") == 0:
-            self.logger.log("Нет файлов к отправке!")
+    #     if file_explorer.count_files_in_folder(dir_armkbr + "\\exg\\rcv") == 0:
+    #         self.logger.log("Нет файлов для отправки!")
 
-        else:
-            file_explorer.check_dir(dir_archive)
-            file_explorer.check_dir(arm_buf)
+    #     else:
+    #         file_explorer.check_dir(dir_archive)
+    #         file_explorer.check_dir(arm_buf)
 
-            file_explorer.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
+    #         file_explorer.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
 
-            file_explorer.decode_files(unb64_rabis, arm_buf, dir_log)
+    #         file_explorer.decode_files(unb64_rabis, arm_buf, dir_log)
 
-            arc_dir = dir_archive + "\\" + current_date + "\\uarm3\\inc\\ed"
+    #         arc_dir = dir_archive + "\\" + current_date + "\\uarm3\\inc\\ed"
 
-            file_explorer.check_dir(arc_dir)
+    #         file_explorer.check_dir(arc_dir)
 
-            file_explorer.copy_files(arm_buf, arc_dir, r".*\.ed\.xml")
-            file_explorer.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml")
+    #         file_explorer.copy_files(arm_buf, arc_dir, r".*\.ed\.xml")
+    #         file_explorer.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml")
 
-            trans_disk_path = trans_disk + "IN_OEBS_BIK\\044525000"
+    #         trans_disk_path = trans_disk + "IN_OEBS_BIK\\044525000"
 
-            file_explorer.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml")
-            file_explorer.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml")
+    #         file_explorer.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml")
+    #         file_explorer.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml")
 
-            file_explorer.copy_files(arm_buf, puds_disk + "input", r".*\.ed")
-            file_explorer.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds")
+    #         file_explorer.copy_files(arm_buf, puds_disk + "input", r".*\.ed$")
+    #         file_explorer.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$")
 
-            file_explorer.delete_files(arm_buf, r".*\.xml")
+    #         file_explorer.delete_files(arm_buf, r".*\.xml")
 
-            file_explorer.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
+    #         file_explorer.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
 
-            file_explorer.delete_files(arm_buf)
+    #         file_explorer.delete_files(arm_buf)
 
     def send_docs(self, rnp):
         """Отправка определенных документов выбираемых на RNP"""

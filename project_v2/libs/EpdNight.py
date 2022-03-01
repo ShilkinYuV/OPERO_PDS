@@ -1,6 +1,7 @@
 from datetime import datetime
 from PyQt5.QtCore import QThread
 from PyQt5 import QtCore
+# import time
 
 from contants.path_constants import (
     dir_log,
@@ -27,8 +28,11 @@ class NightCicle(QThread):
 
     def run(self):
         while self.work:
-            current_hour = datetime.now().hour
-            if current_hour < 9 and current_hour > 21:
+            time_now = datetime.time(datetime.now())
+            time_to = datetime.time(datetime.strptime("09:00:00","%H:%M:%S"))
+            time_from = datetime.time(datetime.strptime("20:30:00","%H:%M:%S"))
+            # C 20:30 до 9 00 
+            if time_to < time_now and time_now > time_from:
                 file_explorer = FileExplorer(_logger=self.logger)
                 file_explorer.check_dir(dir_log)
                 file_explorer.check_dir(dir_armkbr + "\\exg\\rcv")
@@ -43,6 +47,8 @@ class NightCicle(QThread):
                     file_explorer.check_dir(arm_buf)
 
                     file_explorer.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
+
+                    # file_explorer.move_files() Исключить квитки без расширения
 
                     file_explorer.decode_files(unb64_rabis, arm_buf, dir_log)
 
@@ -71,6 +77,6 @@ class NightCicle(QThread):
 
                     file_explorer.delete_files(arm_buf)
 
-                self.sleep(1800)
+                self.sleep(3600)
             else:
-                self.sleep(1800)
+                self.sleep(3600)
