@@ -12,8 +12,6 @@ from contants.path_constants import puds_disk, dir_log
 
 class Logger(QtCore.QObject):
 
-    # log_str = QtCore.pyqtSignal(str, bool)
-
     def __init__(self, file_log_path=None, form_log_path=None):
         fe = FileExplorer()
 
@@ -49,9 +47,7 @@ class Logger(QtCore.QObject):
 
 
 class CheckConnection(Thread):
-        
-        # log_str = QtCore.pyqtSignal(str, bool)
-
+    
         def __init__(self, log_path, _logger):
             Thread.__init__(self)
             self.work = True

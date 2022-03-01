@@ -4,12 +4,12 @@ import shutil
 from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+
 class FileExplorer(QtCore.QObject):
     log_str = QtCore.pyqtSignal(str, bool, bool)
-    
-    def __init__(self, _logger=None):
+
+    def __init__(self):
         super(FileExplorer, self).__init__()
-        self.logger = _logger
 
     def check_dir(self, path):
         """Проверка наличия директории и создание ее в случае отсутствия"""
@@ -62,7 +62,29 @@ class FileExplorer(QtCore.QObject):
                         self.log(message, True)
 
         # Проверка, переместились ли файлы
-        self.check_move_or_copy_files(listdir, path_to)
+        count = self.check_move_or_copy_files(listdir, path_from, path_to)
+        if count == 0:
+            self.log(
+                "Все файлы успешно в количестве {} перемещены из [{}] в [{}]".format(
+                    len(listdir), path_from, path_to
+                )
+            )
+
+        elif count is None:
+            self.log(
+                "Нет файлов для перемещения с масокй [{}] из [{}] в [{}]".format(
+                    filter,path_from, path_to
+                ),
+                isError=False,
+            )
+
+        else:
+            self.log(
+                "Не удалось переместить {} файлов из [{}] в [{}]".format(
+                    count, path_from, path_to
+                ),
+                isError=True,
+            )
 
     def copy_files(self, path_from, path_to, filter=None):
         """Копирование файлов из одной директории в другую.
@@ -93,7 +115,28 @@ class FileExplorer(QtCore.QObject):
                         self.log(message, True)
 
         # Проверка, скопировались ли файлы
-        self.check_move_or_copy_files(listdir, path_to)
+        count = self.check_move_or_copy_files(listdir, path_from, path_to)
+        if count == 0:
+            self.log(
+                "Все файлы успешно в количестве {} скопированы из [{}] в [{}]".format(
+                    len(listdir), path_from, path_to
+                )
+            )
+        elif count is None:
+            self.log(
+                "Нет файлов для копирования с маской [{}] из [{}] в [{}]".format(
+                    filter,path_from, path_to
+                ),
+                isError=False,
+            )
+
+        else:
+            self.log(
+                "Не удалось скопировать {} файлов из [{}] в [{}]".format(
+                    count, path_from, path_to
+                ),
+                isError=True,
+            )
 
     def delete_files(self, path_from, filter=None):
         """Удаление файлов из директории.
@@ -163,46 +206,32 @@ class FileExplorer(QtCore.QObject):
         else:
             undecode_count = count_before - (count_after - count_before)
             self.log(
-                "Ошибка расшифровки! Из {} расшифровано {}.".format(
+                "Ошибка расшифровки! Из {} не расшифровано {}.".format(
                     count_before, undecode_count
-                )
+                ),
+                isError=True,
             )
 
-    def check_move_or_copy_files(self, listdir_from, path_to):
+    def check_move_or_copy_files(self, listdir_from, path_from, path_to):
         """Проверка переместились ли файлы в нужную дерикторию"""
+        count = 0
         if len(listdir_from) != 0:
             move_to_listdir = os.listdir(path=path_to)
-            count = 0
             for file_name in listdir_from:
                 try:
                     move_to_listdir.index(file_name)
                 except ValueError as ex:
                     count += 1
-                    # self.logger.log("{file_name} не переместился в " + path_to,isError=True)
 
             if count == 0:
-                self.log(
-                    "Все файлы успешно перемещены/скопированы {}".format(
-                        len(listdir_from)
-                    )
-                )
+                return count
 
-            else:
-                self.log(
-                    "Не удалось переместить/скопировать {count} файлов".format(
-                        count=count
-                    ),
-                    isError=True,
-                )
-
-        else:
-            self.log("Нет файлов для отправки!")
+            elif count > 0:
+                return count
 
     def log(self, message, isError=False):
-        if self.logger is not None:
-            self.log_str.emit(message, False , isError)
-        else:
-            print(message)
+        self.log_str.emit(message, isError, False)
+        print(message)
 
     def check_dir_for_docs(self, rnp, path_from, path_to):
         archive = path_from + "\\1"
