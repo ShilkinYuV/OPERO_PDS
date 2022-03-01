@@ -8,9 +8,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 class FileExplorer(QtCore.QObject):
     log_str = QtCore.pyqtSignal(str, bool, bool)
 
-    def __init__(self, _logger=None):
+    def __init__(self):
         super(FileExplorer, self).__init__()
-        self.logger = _logger
 
     def check_dir(self, path):
         """Проверка наличия директории и создание ее в случае отсутствия"""
@@ -195,14 +194,14 @@ class FileExplorer(QtCore.QObject):
                 "Ошибка расшифровки! Из {} не расшифровано {}.".format(
                     count_before, undecode_count
                 ),
-                isError=False,
+                isError=True,
             )
 
     def check_move_or_copy_files(self, listdir_from, path_from, path_to):
         """Проверка переместились ли файлы в нужную дерикторию"""
+        count = 0
         if len(listdir_from) != 0:
             move_to_listdir = os.listdir(path=path_to)
-            count = 0
             for file_name in listdir_from:
                 try:
                     move_to_listdir.index(file_name)
@@ -211,23 +210,9 @@ class FileExplorer(QtCore.QObject):
 
             if count == 0:
                 return count
-                # self.log(
-                #     "Все файлы успешно перемещены/скопированы {} из [{}] в [{}]".format(
-                #         len(listdir_from), path_from, path_to
-                #     )
-                # )
 
             else:
                 return count
-                # self.log(
-                #     "Не удалось переместить/скопировать {} файлов из {} в {}".format(
-                #         count, path_from, path_to
-                #     ),
-                #     isError=True,
-                # )
-
-        # else:
-        #     self.log("Нет !")
 
     def log(self, message, isError=False):
         if self.logger is not None:

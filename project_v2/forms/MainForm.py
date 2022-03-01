@@ -1,6 +1,7 @@
 from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
 from libs.EpdNight import NightCicle
+from libs.EpdDay import EpdDay
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
 import os
@@ -22,12 +23,13 @@ from libs.Logger import Logger, CheckConnection
 
 
 class MainForm(QtWidgets.QMainWindow):
+
     def __init__(self) -> None:
         super(MainForm, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.textEdit.setReadOnly(True)
-        self.ui.day.clicked.connect(self.epd_day_start)
+        self.ui.day.clicked.connect(self.epd_day2_start)
         self.ui.chekDocuments.clicked.connect(self.check_dirs)
         self.ui.night.clicked.connect(self.epd_night)
         self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
@@ -53,27 +55,41 @@ class MainForm(QtWidgets.QMainWindow):
 
     def read_local_log(self):
         """Чтение лога, при наличии и вывод в визуальную форму"""
-        path = dir_log + '\\1\\' + datetime.now().strftime("%Y%m%d") + '\\' + "sample.log"
+        path = (
+            dir_log + "\\1\\" + datetime.now().strftime("%Y%m%d") + "\\" + "sample.log"
+        )
         if os.path.isfile(path):
-            log = open(path, 'r')
+            log = open(path, "r")
             num_lines = sum(1 for line in open(path))
             if num_lines == 0:
                 self.ui.textEdit.append('По пути "{}" пустой лог '.format(path))
             else:
-                print('start loop')
+                print("start loop")
                 for line in log:
                     # Делим строчку лога на тип, дату и сообщение
-                    splitted = line.split('|')
+                    splitted = line.split("|")
                     type = splitted[0]
-                    date_time = splitted[1].replace(splitted[1][19:26],"")
+                    date_time = splitted[1].replace(splitted[1][19:26], "")
                     message = splitted[2]
 
-                    if type.__contains__('ERROR') and not message.__contains__('CheckConnection'):
-                        self.ui.textEdit.append("<font color='red'>{date} {message}</font>".format(date=date_time, message=message))
-                    
-                    elif type.__contains__('INFO') and not message.__contains__('CheckConnection'):
-                        self.ui.textEdit.append("<font color='white'>{date} {message}</font>".format(date=date_time, message=message))
-                        
+                    if type.__contains__("ERROR") and not message.__contains__(
+                        "CheckConnection"
+                    ):
+                        self.ui.textEdit.append(
+                            "<font color='red'>{date} {message}</font>".format(
+                                date=date_time, message=message
+                            )
+                        )
+
+                    elif type.__contains__("INFO") and not message.__contains__(
+                        "CheckConnection"
+                    ):
+                        self.ui.textEdit.append(
+                            "<font color='white'>{date} {message}</font>".format(
+                                date=date_time, message=message
+                            )
+                        )
+
         else:
             self.ui.textEdit.append('По пути "{}" отсутствует лог '.format(path))
 
@@ -88,50 +104,9 @@ class MainForm(QtWidgets.QMainWindow):
         self.about_form = AboutForm()
         self.about_form.show()
 
-    # def epd_day_start(self):
-
-    #     file_explorer = FileExplorer(_logger=self.logger)
-    #     file_explorer.log_str.connect(self.log)
-    #     file_explorer.check_dir(dir_log)
-    #     file_explorer.check_dir(dir_armkbr + "\\exg\\rcv")
-
-    #     current_date = datetime.now().strftime("%d.%m.%Y")
-
-    #     if file_explorer.count_files_in_folder(dir_armkbr + "\\exg\\rcv") == 0:
-    #         self.logger.log("Нет файлов для отправки!")
-
-    #     else:
-    #         file_explorer.check_dir(dir_archive)
-    #         file_explorer.check_dir(arm_buf)
-
-    #         file_explorer.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
-
-    #         file_explorer.decode_files(unb64_rabis, arm_buf, dir_log)
-
-    #         arc_dir = dir_archive + "\\" + current_date + "\\uarm3\\inc\\ed"
-
-    #         file_explorer.check_dir(arc_dir)
-
-    #         file_explorer.copy_files(arm_buf, arc_dir, r".*\.ed\.xml")
-    #         file_explorer.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml")
-
-    #         trans_disk_path = trans_disk + "IN_OEBS_BIK\\044525000"
-
-    #         file_explorer.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml")
-    #         file_explorer.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml")
-
-    #         file_explorer.copy_files(arm_buf, puds_disk + "input", r".*\.ed$")
-    #         file_explorer.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$")
-
-    #         file_explorer.delete_files(arm_buf, r".*\.xml")
-
-    #         file_explorer.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
-
-    #         file_explorer.delete_files(arm_buf)
-
     def send_docs(self, rnp):
         """Отправка определенных документов выбираемых на RNP"""
-        file_explorer = FileExplorer(_logger=self.logger)
+        file_explorer = FileExplorer()
         file_explorer.log_str.connect(self.log)
 
         current_date = datetime.now().strftime("%d%m%Y")
@@ -159,9 +134,9 @@ class MainForm(QtWidgets.QMainWindow):
 
     def check_dirs(self):
         """Проверка директорий на наличие файлов"""
-        file_explorer = FileExplorer(_logger=self.logger)
+        file_explorer = FileExplorer()
         file_explorer.log_str.connect(self.log)
-        
+
         current_date = datetime.now().strftime("%d%m%Y")
 
         vchera = trans_disk + "\\OUT_OEBS\\4800\\044525000\\" + current_date
@@ -174,77 +149,19 @@ class MainForm(QtWidgets.QMainWindow):
         )
 
     def epd_day2_start(self):
+        self.day_thread = EpdDay(form=self)
+        self.day_thread.log_str.connect(self.log)
+        self.day_thread.start()
+        self.ui.day.setDisabled(True)
 
-        fe = FileExplorer(_logger=self.logger)
-
-        count_ed201 = fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv", filter=r'.*ed201.*')
-
-        if count_ed201 != 0:
-            pass
-            
-        else:
-            rcv = dir_armkbr + "\\Exg\\rcv"
-            bvp = rcv + "\\211"
-
-            dd = datetime.now().day
-
-            fe.move_files(rcv,bvp,filter=r".*4525000987000000000000ED2114"+str(dd)+r"01.*\.ed")
-            fe.move_files(rcv,bvp,filter=r".*4525000987000000000000ED2114"+str(dd)+r"02.*\.ed")
-            fe.move_files(rcv,bvp,filter=r".*4525000987000000000000ED2114"+str(dd)+r"03.*\.ed")
-            fe.move_files(rcv,bvp,filter=r".*4525000987000000000000ED2114"+str(dd)+r"04.*\.ed")
-
-            fe.check_dir(dir_log)
-            fe.check_dir(dir_armkbr + "\\exg\\rcv")
-
-            if fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv") == 0:
-                self.logger.log("Нет файлов к отправке!")
-
-            else:
-
-                current_date = datetime.now().strftime("%d.%m.%Y")
-
-                fe.check_dir(dir_archive)
-                fe.check_dir(arm_buf)
-
-                fe.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
-
-                fe.decode_files(unb64_rabis, arm_buf, dir_log)
-
-                arc_dir = dir_archive + "\\" + current_date + "\\uarm3\\inc\\ed"
-
-                fe.check_dir(arc_dir)
-
-                fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml")
-                fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml")
-
-                trans_disk_path = trans_disk + "IN_OEBS_BIK\\044525000"
-
-                rash = "D:\\rash\\ED808"
-
-                fe.check_dir(rash)
-
-                fe.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml")
-                fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml")
-                fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml")
-
-                fe.copy_files(arm_buf, puds_disk + "input", r".*\.ed")
-                fe.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds")
-
-                fe.delete_files(arm_buf, r".*\.xml")
-
-                fe.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
-
-                fe.delete_files(arm_buf)
-                
-
-            pass
-        
     def epd_night(self):
         print("epd night")
         if self.press_button == False:
-            self.ui.night.setStyleSheet('QPushButton {background-color: #8AB6D1;} QPushButton:hover {background-color: #607E91;}')
+            self.ui.night.setStyleSheet(
+                "QPushButton {background-color: #8AB6D1;} QPushButton:hover {background-color: #607E91;}"
+            )
 
-            self.night_thread = NightCicle(self.logger)
+            self.night_thread = NightCicle()
             self.night_thread.log_str.connect(self.log)
             self.night_thread.start()
 
@@ -253,8 +170,10 @@ class MainForm(QtWidgets.QMainWindow):
             self.press_button = False
             self.night_thread.work = False
             self.night_thread.quit()
-            self.ui.night.setStyleSheet('QPushButton {background-color: #607E91;} QPushButton:hover {background-color: #8AB6D1;}')
+            self.ui.night.setStyleSheet(
+                "QPushButton {background-color: #607E91;} QPushButton:hover {background-color: #8AB6D1;}"
+            )
 
     @QtCore.pyqtSlot(str, bool, bool)
-    def log(self, message,isError, onlyInFile):
-        self.logger.log(message,isError,onlyInFile)
+    def log(self, message, isError, onlyInFile):
+        self.logger.log(message, isError, onlyInFile)
