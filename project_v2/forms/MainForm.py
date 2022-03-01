@@ -1,12 +1,17 @@
 from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import QMessageBox
+import os
+
 from libs.EpdNight import NightCicle
 from libs.EpdDay import EpdDay
 from libs.SendDocs import SendDocs
 from libs.CheckDirs import CheckDirs
+from libs.FileExplorer import FileExplorer
+from libs.Logger import Logger, CheckConnection
+
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
-import os
 
 from datetime import datetime
 from contants.path_constants import (
@@ -20,8 +25,8 @@ from contants.path_constants import (
     CLI,
 )
 from contants.doc_types import doc_types
-from libs.FileExplorer import FileExplorer
-from libs.Logger import Logger, CheckConnection
+from contants.app_constants import app_name, app_version
+
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -43,6 +48,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.ZINFSEND.clicked.connect(lambda: self.send_docs(doc_types["ZINFSEND"]))
         self.ui.ZONDSEND.clicked.connect(lambda: self.send_docs(doc_types["ZONDSEND"]))
         self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"]))
+        self.setWindowTitle("{} - v{}".format(app_name, app_version))
+        self.day_thread = None
 
         self.about_form = None
         self.ui.pushButton_2.clicked.connect(self.open_about_form)
@@ -63,6 +70,7 @@ class MainForm(QtWidgets.QMainWindow):
         if os.path.isfile(path):
             log = open(path, "r")
             num_lines = sum(1 for line in open(path))
+            first = True
             if num_lines == 0:
                 self.ui.textEdit.append('По пути "{}" пустой лог '.format(path))
             else:
@@ -70,27 +78,34 @@ class MainForm(QtWidgets.QMainWindow):
                 for line in log:
                     # Делим строчку лога на тип, дату и сообщение
                     splitted = line.split("|")
+
                     type = splitted[0]
                     date_time = splitted[1].replace(splitted[1][19:26], "")
                     message = splitted[2]
 
-                    if type.__contains__("ERROR") and not message.__contains__(
-                        "CheckConnection"
-                    ):
-                        self.ui.textEdit.append(
-                            "<font color='red'>{date} {message}</font>".format(
-                                date=date_time, message=message
+                    if len(message) == 1:
+                        if first is False:
+                            self.ui.textEdit.append(" ")
+                        else:
+                            first = False
+                    else:
+                        if type.__contains__("ERROR") and not message.__contains__(
+                            "CheckConnection"
+                        ):
+                            self.ui.textEdit.append(
+                                "<font color='red'>{date} {message}</font>".format(
+                                    date=date_time, message=message
+                                )
                             )
-                        )
 
-                    elif type.__contains__("INFO") and not message.__contains__(
-                        "CheckConnection"
-                    ):
-                        self.ui.textEdit.append(
-                            "<font color='white'>{date} {message}</font>".format(
-                                date=date_time, message=message
+                        elif type.__contains__("INFO") and not message.__contains__(
+                            "CheckConnection"
+                        ):
+                            self.ui.textEdit.append(
+                                "<font color='white'>{date} {message}</font>".format(
+                                    date=date_time, message=message
+                                )
                             )
-                        )
 
         else:
             self.ui.textEdit.append('По пути "{}" отсутствует лог '.format(path))
@@ -107,6 +122,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.about_form.show()
 
     def send_docs(self, rnp):
+        """Отправка доков по определенным РНП"""
+        self.log('',False, False)
         sender = self.sender()
         self.sendDocs = SendDocs(form=self, rnp=rnp, doc_type=sender.text())
         self.sendDocs.log_str.connect(self.log)
@@ -114,18 +131,23 @@ class MainForm(QtWidgets.QMainWindow):
 
     def check_dirs(self):
         """Проверка директорий на наличие файлов"""
+        self.log('',False, False)
         self.check_dirs = CheckDirs(form=self,doc_types=doc_types)
         self.check_dirs.log_str.connect(self.log)
         self.check_dirs.start()
 
     def epd_day2_start(self):
+        """ЭПД дневное"""
+        self.log('',False, False)
         self.day_thread = EpdDay(form=self)
         self.day_thread.log_str.connect(self.log)
+        self.day_thread.confir_message.connect(self.accept_form)
         self.day_thread.start()
         self.ui.day.setDisabled(True)
 
     def epd_night(self):
         print("epd night")
+        # self.log('',False, False)
         if self.press_button == False:
             self.ui.night.setStyleSheet(
                 "QPushButton {background-color: #8AB6D1;} QPushButton:hover {background-color: #607E91;}"
@@ -147,3 +169,16 @@ class MainForm(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(str, bool, bool)
     def log(self, message, isError, onlyInFile):
         self.logger.log(message, isError, onlyInFile)
+
+    @QtCore.pyqtSlot(str, str)
+    def accept_form(self, title, message):
+        # self.day_thread.
+        reply = QMessageBox.question(self, title, message,
+        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+
+        if reply == QMessageBox.Yes:
+            self.day_thread.confirm = True
+
+        else:
+            self.day_thread.confirm = False
