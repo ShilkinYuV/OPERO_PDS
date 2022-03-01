@@ -24,7 +24,6 @@ class EpdDay(QThread):
 
     def __init__(self, form):
         QThread.__init__(self)
-        self.work = True
         self.form = form
         self.fe = FileExplorer()
         self.fe.log_str.connect(form.log)
@@ -47,7 +46,7 @@ class EpdDay(QThread):
                     'C 16:00 до 16:30 обычно происходит формирование "ППБ". Вы уверены что хотите продолжить загрузку?',
                     QtGui.QMessageBox.Yes | QtGui.QMessageBox.No 
                 )
-                
+
         self.form.ui.day.setDisabled(False)
 
     def stage1(self):
@@ -64,7 +63,9 @@ class EpdDay(QThread):
         rcv = dir_armkbr + "\\Exg\\rcv"
         bvp = rcv + "\\211"
 
-        dd = datetime.now().day
+        dd = datetime.now().strftime('%d')
+
+        print(dd)
 
         self.fe.move_files(
             rcv, bvp, filter=r".*4525000987000000000000ed2114" + str(dd) + r"01.*\.ed$"

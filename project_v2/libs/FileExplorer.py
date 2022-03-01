@@ -70,9 +70,17 @@ class FileExplorer(QtCore.QObject):
                 )
             )
 
+        elif count is None:
+            self.log(
+                "Нет файлов для перемещения с масокй [{}] из [{}] в [{}]".format(
+                    filter,path_from, path_to
+                ),
+                isError=False,
+            )
+
         else:
             self.log(
-                "Не удалось переместить {} файлов из {} в {}".format(
+                "Не удалось переместить {} файлов из [{}] в [{}]".format(
                     count, path_from, path_to
                 ),
                 isError=True,
@@ -114,10 +122,17 @@ class FileExplorer(QtCore.QObject):
                     len(listdir), path_from, path_to
                 )
             )
+        elif count is None:
+            self.log(
+                "Нет файлов для копирования с маской [{}] из [{}] в [{}]".format(
+                    filter,path_from, path_to
+                ),
+                isError=False,
+            )
 
         else:
             self.log(
-                "Не удалось скопировать {} файлов из {} в {}".format(
+                "Не удалось скопировать {} файлов из [{}] в [{}]".format(
                     count, path_from, path_to
                 ),
                 isError=True,
@@ -211,14 +226,12 @@ class FileExplorer(QtCore.QObject):
             if count == 0:
                 return count
 
-            else:
+            elif count > 0:
                 return count
 
     def log(self, message, isError=False):
-        if self.logger is not None:
-            self.log_str.emit(message, False, isError)
-        else:
-            print(message)
+        self.log_str.emit(message, isError, False)
+        print(message)
 
     def check_dir_for_docs(self, rnp, path_from, path_to):
         archive = path_from + "\\1"

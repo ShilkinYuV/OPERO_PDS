@@ -2,6 +2,8 @@ from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
 from libs.EpdNight import NightCicle
 from libs.EpdDay import EpdDay
+from libs.SendDocs import SendDocs
+from libs.CheckDirs import CheckDirs
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
 import os
@@ -105,48 +107,16 @@ class MainForm(QtWidgets.QMainWindow):
         self.about_form.show()
 
     def send_docs(self, rnp):
-        """Отправка определенных документов выбираемых на RNP"""
-        file_explorer = FileExplorer()
-        file_explorer.log_str.connect(self.log)
-
-        current_date = datetime.now().strftime("%d%m%Y")
-
-        vchera = trans_disk + "\\OUT_OEBS\\4800\\044525000\\" + current_date
-
-        file_explorer.check_dir(vchera)
-
-        vcheran = trans_disk + "\\OUT_OEBS\\4800\\004525987\\" + current_date
-
-        file_explorer.check_dir(vcheran)
-
-        count = 0
-
-        count += file_explorer.check_dir_for_docs(
-            rnp=rnp, path_from=vchera, path_to=CLI
-        )
-        count += file_explorer.check_dir_for_docs(
-            rnp=rnp, path_from=vcheran, path_to=CLI
-        )
-
-        if count == 0:
-            sender = self.sender()
-            self.logger.log("Не найдено ни одного документа {}".format(sender.text()))
+        sender = self.sender()
+        self.sendDocs = SendDocs(form=self, rnp=rnp, doc_type=sender.text())
+        self.sendDocs.log_str.connect(self.log)
+        self.sendDocs.start()
 
     def check_dirs(self):
         """Проверка директорий на наличие файлов"""
-        file_explorer = FileExplorer()
-        file_explorer.log_str.connect(self.log)
-
-        current_date = datetime.now().strftime("%d%m%Y")
-
-        vchera = trans_disk + "\\OUT_OEBS\\4800\\044525000\\" + current_date
-        vcheran = trans_disk + "\\OUT_OEBS\\4800\\004525987\\" + current_date
-
-        file_explorer.check_dirs_for_send_docs(
-            rnp_folders=[vchera, vcheran],
-            rnp_doc_types=doc_types,
-            dir_armkbrn=(dir_armkbr + "\\exg\\rcv"),
-        )
+        self.check_dirs = CheckDirs(form=self,doc_types=doc_types)
+        self.check_dirs.log_str.connect(self.log)
+        self.check_dirs.start()
 
     def epd_day2_start(self):
         self.day_thread = EpdDay(form=self)
@@ -161,7 +131,7 @@ class MainForm(QtWidgets.QMainWindow):
                 "QPushButton {background-color: #8AB6D1;} QPushButton:hover {background-color: #607E91;}"
             )
 
-            self.night_thread = NightCicle()
+            self.night_thread = NightCicle(form=self)
             self.night_thread.log_str.connect(self.log)
             self.night_thread.start()
 
