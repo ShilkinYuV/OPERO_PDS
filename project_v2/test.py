@@ -1,18 +1,16 @@
+import os
+import subprocess
+
+# req = os.system("ping 192.158.2.4")
 
 
-from datetime import datetime
+DNULL = open(os.devnull, 'w')
+def ping(host):
+    response = os.system("ping " + host)
+    if response == 0:
+        return True
+    else:
+        return False
 
-time_from = datetime.time(datetime.strptime("09:00:00","%H:%M:%S"))
-time_to = datetime.time(datetime.strptime("20:30:00","%H:%M:%S"))
 
-now_min = datetime.now().minute.__str__()
-
-
-time = datetime.time(datetime.now()).__str__()
-
-now_min = time[4]
-print(now_min)
-
-# print(time)
-
-# print(time_from)
+ping("google.com")
