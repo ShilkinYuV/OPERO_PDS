@@ -1,4 +1,6 @@
 from datetime import datetime
+import os
+from xml.dom import minidom
 from PyQt5.QtCore import QThread
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -30,16 +32,47 @@ class CheckDirs(QThread):
         self.fe.log_str.connect(form.log)
 
     def run(self):
-        """Отправка определенных документов выбираемых на RNP"""
+        """Проверка наличия документов для отправки"""
 
         current_date = datetime.now().strftime("%d%m%Y")
 
         vchera = trans_disk + "\\OUT_OEBS\\4800\\044525000\\" + current_date
         vcheran = trans_disk + "\\OUT_OEBS\\4800\\004525987\\" + current_date
 
-        self.fe.check_dirs_for_send_docs(
-            rnp_folders=[vchera, vcheran],
-            rnp_doc_types=self.doc_types,
-            dir_armkbrn=(dir_armkbr + "\\exg\\rcv"),
-        )
+        current_date = datetime.now().strftime("%Y%m%d")
+        puds_dir = puds_disk + '\\output\\' + current_date
+
+        rnp_folders={vchera: "АСФК", vcheran: "АСФК", puds_dir: "ПУДС"}
+
+        isEmpty = True
+        for k, v in self.doc_types.items():
+            for folder, doc_from in rnp_folders.items():
+                count = 0
+                self.fe.check_dir(folder)
+                for file_name in os.listdir(folder):
+                    file_path = folder + "\\" + file_name
+                    if os.path.isfile(file_path):
+                        mydoc = minidom.parse(file_path)
+                        items = mydoc.getElementsByTagName("sen:Object")
+                        for elem in items:
+                            self.elementXML = str(elem.firstChild.data)
+                            if self.elementXML.__contains__(v):
+                                isEmpty = False
+                                count += 1
+                if count != 0:
+                    self.log_str.emit(
+                        "Найдены документы типа - {}, в количестве {} из {}".format(k, count, doc_from), False, False
+                    )
+
+        [count, confirm_count] = self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv")
         
+
+        if count != 0:
+            isEmpty = False
+            self.log_str.emit("Найдены документы для отправки ЭПД в количестве {}".format(count), False, False)
+
+        if confirm_count != 0:
+            self.log_str.emit("Найдены квитки по директории ЭПД в количестве {}".format(confirm_count), False, False)
+
+        if isEmpty:
+            self.log_str.emit("Документов для отправки не найдено", False, False)

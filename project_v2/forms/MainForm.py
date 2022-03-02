@@ -1,3 +1,4 @@
+from re import S
 from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox
@@ -9,6 +10,7 @@ from libs.SendDocs import SendDocs
 from libs.CheckDirs import CheckDirs
 from libs.FileExplorer import FileExplorer
 from libs.Logger import Logger, CheckConnection
+from libs.CheckVPN import CheckVPN
 
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
@@ -41,13 +43,23 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.night.clicked.connect(self.epd_night)
         self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
 
-        self.ui.OTVSEND.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"]))
-        self.ui.OTZVSEND.clicked.connect(lambda: self.send_docs(doc_types["OTZVSEND"]))
-        self.ui.PESSEND.clicked.connect(lambda: self.send_docs(doc_types["PESSEND"]))
-        self.ui.RNPSEND.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND"]))
-        self.ui.ZINFSEND.clicked.connect(lambda: self.send_docs(doc_types["ZINFSEND"]))
-        self.ui.ZONDSEND.clicked.connect(lambda: self.send_docs(doc_types["ZONDSEND"]))
-        self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"]))
+        self.ui.OTVSEND.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"],False))
+        self.ui.RNPSEND.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND"],False))
+        self.ui.OTZVSEND.clicked.connect(lambda: self.send_docs(doc_types["OTZVSEND"],False))
+        self.ui.PESSEND.clicked.connect(lambda: self.send_docs(doc_types["PESSEND"],False))
+        self.ui.ZINFSEND.clicked.connect(lambda: self.send_docs(doc_types["ZINFSEND"],False))
+        self.ui.ZONDSEND.clicked.connect(lambda: self.send_docs(doc_types["ZONDSEND"],False))
+        self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"],False))
+
+        self.ui.OTVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"],True))
+        self.ui.RNPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND"],True))
+        self.ui.OTZVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTZVSEND"],True))
+        self.ui.PESSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["PESSEND"],True))
+        self.ui.ZINFSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["ZINFSEND"],True))
+        self.ui.ZONDSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["ZONDSEND"],True))
+        self.ui.ZVPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"],True))
+
+
         self.setWindowTitle("{} - v{}".format(app_name, app_version))
         self.day_thread = None
 
@@ -58,9 +70,12 @@ class MainForm(QtWidgets.QMainWindow):
         self.logger = Logger(file_log_path=dir_log, form_log_path=self.ui.textEdit)
 
         self.night_thread = None
+        self.check_vpn = None
 
         self.check_connection()
         self.read_local_log()
+        self.epd_night()
+        self.start_check_vpn(hosts=['10.100.0.3', '10.100.0.4'])
 
     def read_local_log(self):
         """Чтение лога, при наличии и вывод в визуальную форму"""
@@ -121,11 +136,11 @@ class MainForm(QtWidgets.QMainWindow):
         self.about_form = AboutForm()
         self.about_form.show()
 
-    def send_docs(self, rnp):
+    def send_docs(self, rnp, isFromPuds):
         """Отправка доков по определенным РНП"""
         self.log('',False, False)
         sender = self.sender()
-        self.sendDocs = SendDocs(form=self, rnp=rnp, doc_type=sender.text())
+        self.sendDocs = SendDocs(form=self, rnp=rnp, doc_type=sender.text(), isFromPuds=isFromPuds)
         self.sendDocs.log_str.connect(self.log)
         self.sendDocs.start()
 
@@ -146,8 +161,6 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.day.setDisabled(True)
 
     def epd_night(self):
-        print("epd night")
-        # self.log('',False, False)
         if self.press_button == False:
             self.ui.night.setStyleSheet(
                 "QPushButton {background-color: #8AB6D1;} QPushButton:hover {background-color: #607E91;}"
@@ -159,12 +172,18 @@ class MainForm(QtWidgets.QMainWindow):
 
             self.press_button = True
         else:
-            self.press_button = False
-            self.night_thread.work = False
-            self.night_thread.quit()
-            self.ui.night.setStyleSheet(
-                "QPushButton {background-color: #607E91;} QPushButton:hover {background-color: #8AB6D1;}"
-            )
+            reply = QMessageBox.question(self, "Отключить ЭПД ночной?", "Вы уверены, что хотите отключить ночной ЭПД?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+            if reply == QMessageBox.Yes:
+                self.press_button = False
+                self.night_thread.work = False
+                self.night_thread.quit()
+                self.ui.night.setStyleSheet(
+                    "QPushButton {background-color: #607E91;} QPushButton:hover {background-color: #8AB6D1;}"
+                )
+            else:
+                pass
 
     @QtCore.pyqtSlot(str, bool, bool)
     def log(self, message, isError, onlyInFile):
@@ -172,7 +191,6 @@ class MainForm(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot(str, str)
     def accept_form(self, title, message):
-        # self.day_thread.
         reply = QMessageBox.question(self, title, message,
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         
@@ -182,3 +200,15 @@ class MainForm(QtWidgets.QMainWindow):
 
         else:
             self.day_thread.confirm = False
+
+
+    def start_check_vpn(self, hosts):
+        self.check_vpn = CheckVPN(self, hosts=hosts)
+        self.check_vpn.log_str.connect(self.log)
+        self.check_vpn.start()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        if self.night_thread is not None:
+            self.night_thread.quit()
+        if self.check_vpn is not None:
+            self.check_vpn.quit()

@@ -46,9 +46,11 @@ class NightCicle(QThread):
                     self.file_explorer.check_dir(dir_archive)
                     self.file_explorer.check_dir(arm_buf)
 
+
+                    self.file_explorer.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
+
                     self.file_explorer.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
 
-                    # self.file_explorer.move_files() Исключить квитки без расширения
 
                     self.file_explorer.decode_files(unb64_rabis, arm_buf, dir_log)
 

@@ -34,13 +34,13 @@ class EpdDay(QThread):
     def run(self):
 
         now_hour = datetime.now().hour
-        now_minutes = datetime.time(datetime.now()).__str__()
+        now_minutes = datetime.time(datetime.now()).__str__()[3]
 
         if now_hour != 16:
             self.stage1()
 
         elif now_hour == 16:
-            if now_minutes == 4 or now_minutes == 5:
+            if now_minutes == "4" or now_minutes == "5":
                 self.stage1()
             else:
                 self.confir_message.emit(
@@ -64,7 +64,7 @@ class EpdDay(QThread):
 
         count = self.fe.count_files_in_folder(
             dir_armkbr + "\\exg\\rcv", filter=r".*ed201.*"
-        )
+        )[0]
 
         if count != 0:
             self.stage3(count)
@@ -78,7 +78,7 @@ class EpdDay(QThread):
 
         dd = datetime.now().strftime("%d")
 
-        if self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv") == 0:
+        if self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv")[0] == 0:
             self.log_str.emit("Нет файлов к отправке!", False, False)
 
         else:
@@ -115,6 +115,8 @@ class EpdDay(QThread):
 
             self.fe.check_dir(dir_archive)
             self.fe.check_dir(arm_buf)
+
+            self.fe.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
 
             self.fe.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
 
