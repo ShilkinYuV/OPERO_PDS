@@ -1,16 +1,13 @@
 import os
 import subprocess
 
-# req = os.system("ping 192.158.2.4")
+from contants.doc_types import doc_types
+
+count = {k:0 for k,v in doc_types.items()}
+
+# for k,v in count.items():
+#     count[k] = 0
 
 
-DNULL = open(os.devnull, 'w')
-def ping(host):
-    response = os.system("ping " + host)
-    if response == 0:
-        return True
-    else:
-        return False
-
-
-ping("google.com")
+print(count)
+print (doc_types)

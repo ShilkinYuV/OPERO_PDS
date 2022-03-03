@@ -25,6 +25,7 @@ from contants.path_constants import (
     trans_disk,
     puds_disk,
     CLI,
+    vpn_settgins_folder
 )
 from contants.doc_types import doc_types
 from contants.app_constants import app_name, app_version
@@ -52,7 +53,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"],False))
 
         self.ui.OTVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"],True))
-        self.ui.RNPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND"],True))
+        self.ui.RNPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND_PUDS"],True))
         self.ui.OTZVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTZVSEND"],True))
         self.ui.PESSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["PESSEND"],True))
         self.ui.ZINFSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["ZINFSEND"],True))
@@ -203,7 +204,7 @@ class MainForm(QtWidgets.QMainWindow):
 
 
     def start_check_vpn(self, hosts):
-        self.check_vpn = CheckVPN(self, hosts=hosts)
+        self.check_vpn = CheckVPN(self, hosts=hosts, settings_path=vpn_settgins_folder)
         self.check_vpn.log_str.connect(self.log)
         self.check_vpn.start()
 
