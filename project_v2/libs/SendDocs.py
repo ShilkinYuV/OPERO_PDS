@@ -47,9 +47,7 @@ class SendDocs(QThread):
             self.fe.check_dir(vcheran)
 
             count += self.send_docs(rnp=self.rnp, path_from=vchera, path_to=CLI)
-            count += self.send_docs(
-                rnp=self.rnp, path_from=vcheran, path_to=CLI
-            )
+            count += self.send_docs(rnp=self.rnp, path_from=vcheran, path_to=CLI)
         else:
             current_date = datetime.now().strftime("%Y%m%d")
             dir = puds_disk + '\\output\\' + current_date
@@ -60,7 +58,11 @@ class SendDocs(QThread):
 
         if count == 0:
             self.log_str.emit(
-                "Не найдено ни одного документа {}".format(self.doc_type), False, False
+                "Не отправлено ни одного документа {}".format(self.doc_type), False, False
+            )
+        else:
+            self.log_str.emit(
+                "Отправлено {} документов {}".format(count, self.doc_type), False, False
             )
 
 
@@ -74,13 +76,20 @@ class SendDocs(QThread):
         for file_name in os.listdir(path_from):
             file_path = path_from + "\\" + file_name
             if os.path.isfile(file_path):
-                mydoc = minidom.parse(file_path)
-                items = mydoc.getElementsByTagName("sen:Object")
-                for elem in items:
-                    self.elementXML = str(elem.firstChild.data)
-                    if self.elementXML.__contains__(rnp):
-                        self.fe.copy_files(path_from, path_to, filter=file_name.lower())
-                        self.fe.move_files(path_from, archive, filter=file_name.lower())
-                        count += 1
+                if os.path.exists(archive + "\\" + file_name) == False: # Проверка на наличие в архиве
+                    if os.path.exists(path_to + "\\" + file_name) == False: # Проверка на наличие на транспортном диске
+                        mydoc = minidom.parse(file_path)
+                        items = mydoc.getElementsByTagName("sen:Object")
+                        for elem in items:
+                            self.elementXML = str(elem.firstChild.data)
+                            if self.elementXML.__contains__(rnp):
+                                self.fe.copy_files(path_from, path_to, filter=file_name.lower())
+                                self.fe.move_files(path_from, archive, filter=file_name.lower())
+                                count += 1
+                    else:
+                        self.log_str.emit("Документ {} уже присутствует на транспортном диске {}".format(file_name, path_to), True, False)
+                else:
+                    self.log_str.emit("Документ {} уже присутствует в архиве {}".format(file_name, archive), True, False)
+
 
         return count
