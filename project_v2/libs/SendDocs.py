@@ -18,13 +18,14 @@ from contants.path_constants import (
 )
 
 from libs.FileExplorer import FileExplorer
+from libs.LogType import LogType
 
 
 class SendDocs(QThread):
 
-    log_str = QtCore.pyqtSignal(str, bool, bool)
+    log_str = QtCore.pyqtSignal(str,LogType)
 
-    def __init__(self, form, rnp, doc_type, isFromPuds):
+    def __init__(self, form, button, rnp, doc_type, isFromPuds):
         QThread.__init__(self)
         self.form = form
         self.fe = FileExplorer()
@@ -32,9 +33,11 @@ class SendDocs(QThread):
         self.rnp = rnp
         self.doc_type = doc_type
         self.isFromPuds = isFromPuds
+        self.button = button
 
     def run(self):
         """Отправка определенных документов выбираемых на RNP"""
+        self.button.setDisabled(True)
         count = 0
         if self.isFromPuds is False:
             current_date = datetime.now().strftime("%d%m%Y")
@@ -58,13 +61,14 @@ class SendDocs(QThread):
 
         if count == 0:
             self.log_str.emit(
-                "Не отправлено ни одного документа {}".format(self.doc_type), False, False
+                "Не отправлено ни одного документа {}".format(self.doc_type), LogType.INFO
             )
         else:
             self.log_str.emit(
-                "Отправлено {} документов {}".format(count, self.doc_type), False, False
+                "Отправлено {} документов {}".format(count, self.doc_type), LogType.INFO
             )
 
+        self.button.setDisabled(False)
 
     def send_docs(self, rnp, path_from, path_to):
 
@@ -87,9 +91,9 @@ class SendDocs(QThread):
                                 self.fe.move_files(path_from, archive, filter=file_name.lower())
                                 count += 1
                     else:
-                        self.log_str.emit("Документ {} уже присутствует на транспортном диске {}".format(file_name, path_to), True, False)
+                        self.log_str.emit("Документ {} уже присутствует на транспортном диске {}".format(file_name, path_to), LogType.WARNING)
                 else:
-                    self.log_str.emit("Документ {} уже присутствует в архиве {}".format(file_name, archive), True, False)
+                    self.log_str.emit("Документ {} уже присутствует в архиве {}".format(file_name, archive), LogType.WARNING)
 
 
         return count

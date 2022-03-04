@@ -3,10 +3,10 @@ import re
 import shutil
 from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
-
+from libs.LogType import LogType
 
 class FileExplorer(QtCore.QObject):
-    log_str = QtCore.pyqtSignal(str, bool, bool)
+    log_str = QtCore.pyqtSignal(str, LogType)
 
     def __init__(self):
         super(FileExplorer, self).__init__()
@@ -30,11 +30,13 @@ class FileExplorer(QtCore.QObject):
                     if regular.search(file_name.lower()) is not None:
                         if file_name.__contains__('.') == True:
                             count += 1
-                        else: confirm_count += 1
+                        else:
+                            confirm_count += 1
                 else:
                     if file_name.__contains__('.') == True:
                         count += 1
-                    else: confirm_count += 1
+                    else:
+                        confirm_count += 1
 
         return [count, confirm_count]
 
@@ -48,10 +50,14 @@ class FileExplorer(QtCore.QObject):
             if os.path.isfile(path_from + "\\" + file_name):
                 if file_name.__contains__('.') == False:
                     try:
-                        listdir.append(file_name)
-                        shutil.move(path_from + "\\" + file_name, path_to)
+                        if os.path.exists(path_to + "\\" + file_name) == False:
+                            listdir.append(file_name)
+                            shutil.move(path_from + "\\" + file_name, path_to)
+                        else:
+                            self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
                     except Exception as ex:
-                        self.log(message + ' file_name= {}\\{}'.format(path_from, file_name), True)
+                        self.log(message + ' file_name= {}\\{}'.format(path_from,
+                                 file_name), log_type=LogType.ERROR)
 
         # Проверка, переместились ли файлы
         count = self.check_move_or_copy_files(listdir, path_from, path_to)
@@ -59,25 +65,28 @@ class FileExplorer(QtCore.QObject):
             self.log(
                 "Все файлы [Квитки] в количестве {} успешно перемещены из [{}] в [{}]".format(
                     len(listdir), path_from, path_to
-                )
+                ), log_type=LogType.DEBUG
             )
+        
+            return [False, len(listdir)]
 
         elif count is None:
             self.log(
                 "Нет файлов [Квитки] для перемещения из [{}] в [{}]".format(
                     path_from, path_to
-                ),
-                isError=False,
+                ), log_type=LogType.DEBUG
             )
+
+            return [False, 0]
 
         else:
             self.log(
                 "Не удалось переместить {} файлов [Квитки] из [{}] в [{}]".format(
                     count, path_from, path_to
-                ),
-                isError=True,
+                ), log_type=LogType.ERROR
             )
 
+            return [True, count]
 
     def move_files(self, path_from, path_to, filter=None, name_of_doc='все'):
         """Перемещение файлов из одного пути в другой, с проверкой наличия в новой директории"""
@@ -96,41 +105,51 @@ class FileExplorer(QtCore.QObject):
                 if filter is not None:
                     if regular.search(file_name.lower()) is not None:
                         try:
-                            listdir.append(file_name)
-                            shutil.move(path_from + "\\" + file_name, path_to)
+                            if os.path.exists(path_to + "\\" + file_name) == False:
+                                listdir.append(file_name)
+                                shutil.move(path_from + "\\" + file_name, path_to)
+                            else:
+                                self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
                         except Exception as ex:
-                            self.log(message+ ' file_name= {}\\{}'.format(path_from, file_name), True)
+                            self.log(
+                                message + ' file_name= {}\\{}'.format(path_from, file_name), log_type=LogType.ERROR)
                 else:
                     try:
-                        listdir.append(file_name)
-                        shutil.move(path_from + "\\" + file_name, path_to)
+                        if os.path.exists(path_to + "\\" + file_name) == False:
+                            listdir.append(file_name)
+                            shutil.move(path_from + "\\" + file_name, path_to)
+                        else:
+                            self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
                     except Exception as ex:
-                        self.log(message + ' file_name= {}\\{}'.format(path_from, file_name), True)
+                        self.log(message + ' file_name= {}\\{}'.format(path_from,
+                                 file_name), log_type=LogType.ERROR)
 
         # Проверка, переместились ли файлы
         count = self.check_move_or_copy_files(listdir, path_from, path_to)
         if count == 0:
             self.log(
                 "Все файлы [{}] в количестве {} успешно перемещены из [{}] в [{}]".format(
-                    name_of_doc,len(listdir), path_from, path_to
-                )
+                    name_of_doc, len(listdir), path_from, path_to
+                ), log_type=LogType.DEBUG
             )
+            return [False, len(listdir)]
 
         elif count is None:
             self.log(
                 "Нет файлов [{}] для перемещения из [{}] в [{}]".format(
-                    name_of_doc ,path_from, path_to
-                ),
-                isError=False,
+                    name_of_doc, path_from, path_to
+                ), log_type=LogType.DEBUG
             )
+
+            return [False, 0]
 
         else:
             self.log(
                 "Не удалось переместить {} файлов [{}] из [{}] в [{}]".format(
                     count, name_of_doc, path_from, path_to
-                ),
-                isError=True,
+                ), log_type=LogType.ERROR
             )
+            return [True, count]
 
     def copy_files(self, path_from, path_to, filter=None, name_of_doc='все'):
         """Копирование файлов из одной директории в другую.
@@ -149,16 +168,25 @@ class FileExplorer(QtCore.QObject):
                 if filter is not None:
                     if regular.search(file_name.lower()) is not None:
                         try:
-                            shutil.copy2(file_path, path_to)
-                            listdir.append(file_name)
+                            if os.path.exists(path_to + "\\" + file_name) == False:
+                                shutil.copy2(file_path, path_to)
+                                listdir.append(file_name)
+                            else:
+                                self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
+
                         except Exception as ex:
-                            self.log(message + ' file_name= {}\\{}'.format(path_from, file_name), True)
+                            self.log(
+                                message + ' file_name= {}\\{}'.format(path_from, file_name), log_type=LogType.ERROR)
                 else:
                     try:
-                        shutil.copy2(file_path, path_to)
-                        listdir.append(file_name)
+                        if os.path.exists(path_to + "\\" + file_name) == False:
+                            shutil.copy2(file_path, path_to)
+                            listdir.append(file_name)
+                        else:
+                                self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
                     except:
-                        self.log(message + ' file_name= {}\\{}'.format(path_from, file_name), True)
+                        self.log(message + ' file_name= {}\\{}'.format(path_from,
+                                 file_name), log_type=LogType.ERROR)
 
         # Проверка, скопировались ли файлы
         count = self.check_move_or_copy_files(listdir, path_from, path_to)
@@ -166,23 +194,28 @@ class FileExplorer(QtCore.QObject):
             self.log(
                 "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
                     name_of_doc, len(listdir), path_from, path_to
-                )
+                ), log_type=LogType.DEBUG
             )
+
+            return [False, len(listdir)]
+
         elif count is None:
             self.log(
                 "Нет файлов [{}] для копирования из [{}] в [{}]".format(
-                    name_of_doc,path_from, path_to
-                ),
-                isError=False,
+                    name_of_doc, path_from, path_to
+                ), log_type=LogType.DEBUG
             )
+        
+            return [False, 0]
 
         else:
             self.log(
                 "Не удалось скопировать {} файлов [{}] из [{}] в [{}]".format(
                     count, name_of_doc, path_from, path_to
-                ),
-                isError=True,
+                ), log_type=LogType.ERROR
             )
+
+            return [True, count]
 
     def delete_files(self, path_from, filter=None, name_of_doc=''):
         """Удаление файлов из директории.
@@ -206,13 +239,13 @@ class FileExplorer(QtCore.QObject):
                             os.remove(file_path)
                             listdir.append(file_name)
                         except Exception as ex:
-                            self.log(message, isError=True)
+                            self.log(message, log_type=LogType.ERROR)
                 else:
                     try:
                         os.remove(file_path)
                         listdir.append(file_name)
                     except Exception as ex:
-                        self.log(message, isError=True)
+                        self.log(message, log_type=LogType.ERROR)
 
         # Проверка, удалились ли файлы
 
@@ -226,12 +259,11 @@ class FileExplorer(QtCore.QObject):
                 pass
 
         if count == 0:
-            self.log("Все файлы успешно удалены")
+            self.log("Все файлы успешно удалены", log_type=LogType.DEBUG)
 
         else:
             self.log(
-                "Не удалось удалить {count} файлов".format(count=count),
-                isError=True,
+                "Не удалось удалить {count} файлов".format(count=count), log_type=LogType.ERROR
             )
 
     def decode_files(self, decoder, arm_buf, dir_log):
@@ -247,15 +279,14 @@ class FileExplorer(QtCore.QObject):
         count_after = self.count_files_in_folder(arm_buf)[0]
 
         if count_before == count_after - count_before:
-            self.log("Все файлы успешно расшифрованы - {}".format(count_before))
+            self.log("Все файлы успешно расшифрованы - {}".format(count_before), log_type=LogType.INFO)
 
         else:
             undecode_count = count_before - (count_after - count_before)
             self.log(
                 "Ошибка расшифровки! Из {} не расшифровано {}.".format(
                     count_before, undecode_count
-                ),
-                isError=True,
+                ), log_type=LogType.ERROR
             )
 
     def check_move_or_copy_files(self, listdir_from, path_from, path_to):
@@ -275,6 +306,6 @@ class FileExplorer(QtCore.QObject):
             elif count > 0:
                 return count
 
-    def log(self, message, isError=False):
-        self.log_str.emit(message, isError, False)
+    def log(self, message, log_type):
+        self.log_str.emit(message, log_type)
         print(message)
