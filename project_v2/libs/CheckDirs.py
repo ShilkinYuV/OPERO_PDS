@@ -70,7 +70,7 @@ class CheckDirs(QThread):
                             "Найдены документы для отправки типа - {}, в количестве {} из {}".format(k, v, doc_from), LogType.INFO
                         )    
 
-        [count, confirm_count] = self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv")
+        count, confirm_count = self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv")
         
 
         if count != 0:

@@ -78,6 +78,9 @@ class MainForm(QtWidgets.QMainWindow):
         self.epd_night()
         self.start_check_vpn()
 
+        self.count_output = 0
+        self.count_input = 0
+
     def read_local_log(self):
         """Чтение лога, при наличии и вывод в визуальную форму"""
         path = (
@@ -131,6 +134,14 @@ class MainForm(QtWidgets.QMainWindow):
                                     date=date_time, message=message
                                 )
                             )
+                        elif type.__contains__("FILES") and not message.__contains__(
+                            "CheckConnection"
+                        ):
+                            self.ui.textEdit.append(
+                                "<font color='green'>{message}</font>".format(
+                                    date=date_time, message=message
+                                )
+                            )
 
         else:
             self.ui.textEdit.append('По пути "{}" отсутствует лог '.format(path))
@@ -151,6 +162,7 @@ class MainForm(QtWidgets.QMainWindow):
         sender = self.sender()
         self.sendDocs = SendDocs(form=self,button=self.sender(), rnp=rnp, doc_type=sender.text(), isFromPuds=isFromPuds)
         self.sendDocs.log_str.connect(self.log)
+        self.sendDocs.update_counts.connect(self.update_counts)
         self.sendDocs.start()
 
     def check_dirs(self):
@@ -166,6 +178,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.day_thread = EpdDay(form=self)
         self.day_thread.log_str.connect(self.log)
         self.day_thread.confir_message.connect(self.accept_form)
+        self.day_thread.update_counts.connect(self.update_counts)
         self.day_thread.start()
         self.ui.day.setDisabled(True)
 
@@ -177,6 +190,7 @@ class MainForm(QtWidgets.QMainWindow):
 
             self.night_thread = NightCicle(form=self)
             self.night_thread.log_str.connect(self.log)
+            self.night_thread.update_counts.connect(self.update_counts)
             self.night_thread.start()
 
             self.press_button = True
@@ -197,6 +211,14 @@ class MainForm(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(str, LogType)
     def log(self, message, log_type):
         self.logger.log(message, log_type=log_type)
+
+    @QtCore.pyqtSlot(int, int)
+    def update_counts(self, output, input):
+        self.count_output += output
+        self.count_input  += input
+
+        self.ui.lbl_output_count.setText('Отправлено: {}'.format(self.count_output))
+        self.ui.lbl_inptut_count.setText('Загружено: {}'.format(self.count_input))
 
     @QtCore.pyqtSlot(str, str)
     def accept_form(self, title, message):

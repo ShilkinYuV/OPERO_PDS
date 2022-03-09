@@ -48,6 +48,18 @@ class Logger(QtCore.QObject):
                 self.back.info("INFO|{}|{}".format(
                     current_datetime_mls, message))
 
+        elif log_type == LogType.FILES:
+            if self.file_log_path is not None:
+                self.form_log.append(
+                    "<font color='green'>{message}</font>".format(
+                        date=current_datetime, message=message
+                    )
+                )
+                self.back.info("FILES|{}|{}".format(
+                    current_datetime_mls, message))
+                self.visual.info("FILES|{}|{}".format(
+                current_datetime_mls, message))
+
         elif log_type == LogType.INFO:
             if message == "" or message == " ":
                 self.form_log.append("")
@@ -126,14 +138,16 @@ class CheckConnection(Thread):
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",filter='sample.log'
+                    + "\\",filter='sample.log',
+                    name_of_doc='log'
                 )
                 fe.copy_files(
                     path_from=curr_log,
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",filter='sample.log'
+                    + "\\",filter='sample.log',
+                    name_of_doc='log'
                 )
 
                 self.prev_log = curr_log
@@ -143,7 +157,8 @@ class CheckConnection(Thread):
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",filter='sample.log'
+                    + "\\",filter='sample.log',
+                    name_of_doc='log'
                 )
 
             sleep(240)

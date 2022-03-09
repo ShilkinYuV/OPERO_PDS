@@ -24,6 +24,7 @@ class EpdDay(QThread):
 
     log_str = QtCore.pyqtSignal(str, LogType)
     confir_message = QtCore.pyqtSignal(str, str)
+    update_counts = QtCore.pyqtSignal(int, int)
 
     def __init__(self, form):
         QThread.__init__(self)
@@ -85,7 +86,8 @@ class EpdDay(QThread):
         else:
             # Проверка ED211 документов
             count_ed211 = 0
-            [err, count] = self.fe.move_files(
+            list_of_docs = []
+            err, count, docs = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"01.*\.ed$",
@@ -94,8 +96,9 @@ class EpdDay(QThread):
 
             if not err:
                 count_ed211+=count
+                list_of_docs+=docs
 
-            [err, count] = self.fe.move_files(
+            err, count, docs = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"02.*\.ed$",
@@ -104,8 +107,9 @@ class EpdDay(QThread):
 
             if not err:
                 count_ed211+=count
+                list_of_docs+=docs
 
-            [err, count] = self.fe.move_files(
+            err, count, docs = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"03.*\.ed$",
@@ -114,8 +118,9 @@ class EpdDay(QThread):
 
             if not err:
                 count_ed211+=count
+                list_of_docs+=docs
 
-            [err, count] = self.fe.move_files(
+            err, count, docs = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"04.*\.ed$",
@@ -124,14 +129,18 @@ class EpdDay(QThread):
 
             if not err:
                 count_ed211+=count
+                list_of_docs+=docs
 
-            [err, count] = self.fe.move_files(rcv, bvp, filter=r".*ed211" + str(dd) + r".*\.eds$", name_of_doc='ed211')
+            err, count, docs = self.fe.move_files(rcv, bvp, filter=r".*ed211" + str(dd) + r".*\.eds$", name_of_doc='ed211')
 
             if not err:
                 count_ed211+=count
+                list_of_docs+=docs
             
             if count_ed211 != 0:
                 self.log_str.emit("Документы ED211 успешно перемещены в количестве {} в {}".format(count_ed211, bvp), LogType.INFO)
+                for doc in list_of_docs:
+                    self.log_str.emit(doc,LogType.FILES)
             else:
                 self.log_str.emit("Нет документов ED211 для перемещения.", LogType.INFO)
 
@@ -143,15 +152,19 @@ class EpdDay(QThread):
             self.fe.check_dir(dir_archive)
             self.fe.check_dir(arm_buf)
 
-            [err, count] = self.fe.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
+            err, count, docs = self.fe.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
 
             if not err:
                 self.log_str.emit("Квитки успешно перемещены в архив в количестве {}".format(count), LogType.INFO)
+                # for doc in docs:
+                #     self.log_str.emit(doc, LogType.FILES)
 
-            [err, count] = self.fe.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
+            err, count, docs = self.fe.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
 
             if not err:
                 self.log_str.emit("Файлы успешно перемещены в буфер в кол-ве {}".format(count), LogType.INFO)
+                # for doc in docs:
+                #     self.log_str.emit(doc, LogType.FILES)
 
             self.fe.decode_files(unb64_rabis, arm_buf, dir_log)
 
@@ -160,17 +173,21 @@ class EpdDay(QThread):
             self.fe.check_dir(arc_dir)
             
             arc_xml_count = 0
-
-            [err, count] = self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='xml')
+            doc_xml_list = []
+            err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='xml')
             if not err:
                 arc_xml_count+=count
+                doc_xml_list+=docs
 
-            [err, count] = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='e211.ed.xml')
+            err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='e211.ed.xml')
             if not err:
                 arc_xml_count+=count
+                doc_xml_list+=docs
 
             if arc_xml_count != 0:
                 self.log_str.emit("xml успешно скопированы в архив в кол-ве {} в {}".format(arc_xml_count, arc_dir), LogType.INFO)
+                # for doc in doc_xml_list:
+                #     self.log_str.emit(doc, LogType.FILES)
             else:
                 self.log_str.emit("Нет документов xml для перемещения в архив.", LogType.INFO)
 
@@ -181,44 +198,59 @@ class EpdDay(QThread):
             self.fe.check_dir(rash)
 
             xml_to_trans_disk_count = 0
-            [err, count] = self.fe.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml$", name_of_doc='ed.xml')
+            xml_to_trans_docs_list = []
+            err, count,docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml$", name_of_doc='ed.xml')
             if not err:
                 xml_to_trans_disk_count+=count
-            [err, count] = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.xml')
+                xml_to_trans_docs_list+=docs
+            err, count, docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.xml')
             if not err:
                 xml_to_trans_disk_count+=count
+                xml_to_trans_docs_list+=docs
 
             if xml_to_trans_disk_count != 0:
                 self.log_str.emit("xml успешно скопированы на транспортный диск в кол-ве {}".format(xml_to_trans_disk_count), LogType.INFO)
+                for doc in xml_to_trans_docs_list:
+                    self.log_str.emit(doc, LogType.FILES)
             else:
                 self.log_str.emit("Нет документов xml для перемещения в архив.", LogType.INFO)
 
 
-            [err, count] = self.fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml$", name_of_doc='ed808.xml')
+            err, count,docs = self.fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml$", name_of_doc='ed808.xml')
             if not err:
                 if count!=0:
-                     self.log_str.emit("ed808 успешно скопированы в кол-ве {} в {}".format(count, rash), LogType.INFO)
+                    self.log_str.emit("ed808 успешно скопированы в кол-ве {} в {}".format(count, rash), LogType.INFO)
+                    for doc in docs:
+                        self.log_str.emit(doc, LogType.FILES)
+                     
                 else:
                      self.log_str.emit("ed808 отсутствуют", LogType.INFO)
 
 
             ed_count = 0
-            [err, count] = self.fe.copy_files(arm_buf, puds_disk + "input", r".*\.ed$", name_of_doc='.eds')
+            ed_docs_list = []
+            err, count, docs = self.fe.copy_files(arm_buf, puds_disk + "input", r".*\.ed$", name_of_doc='.eds')
             if not err:
                 ed_count+=count
-            [err, count] = self.fe.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$", name_of_doc='ed211.eds')
+                ed_docs_list+=docs
+            err, count, docs = self.fe.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$", name_of_doc='ed211.eds')
             if not err:
                 ed_count+=count
+                ed_docs_list+=docs
 
-            if count!=0:
-                self.log_str.emit("Ed успешно скопированы в кол-ве {} на диск ПУДС".format(ed_count),LogType.INFO)
+            if ed_count!=0:
+                self.log_str.emit("ed и eds успешно скопированы в кол-ве {} на диск ПУДС".format(ed_count),LogType.INFO)
+                for doc in ed_docs_list:
+                    self.log_str.emit(doc, LogType.FILES)
 
             self.fe.delete_files(arm_buf, r".*\.xml$", name_of_doc='.xml')
 
-            [err, count] = self.fe.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
+            err, count, docs = self.fe.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
             if not err:
                 if count!=0:
-                    self.log_str.emit("Файлы успешно скопированы из буфера в архив {}".format(dir_armkbr + "\\exg\\rcv\\1"), LogType.INFO)
+                    self.log_str.emit("Файлы успешно скопированы из буфера в архив {} в кол-ве {}".format(dir_armkbr + "\\exg\\rcv\\1", count), LogType.INFO)
+                    # for doc in docs:
+                    #     self.log_str.emit(doc, LogType.FILES)
 
             self.fe.delete_files(arm_buf)
 

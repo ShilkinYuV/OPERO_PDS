@@ -60,7 +60,7 @@ class FileExplorer(QtCore.QObject):
                                  file_name), log_type=LogType.ERROR)
 
         # Проверка, переместились ли файлы
-        count = self.check_move_or_copy_files(listdir, path_from, path_to)
+        count,file_name_failed = self.check_move_or_copy_files(listdir, path_from, path_to)
         if count == 0:
             self.log(
                 "Все файлы [Квитки] в количестве {} успешно перемещены из [{}] в [{}]".format(
@@ -68,7 +68,7 @@ class FileExplorer(QtCore.QObject):
                 ), log_type=LogType.DEBUG
             )
         
-            return [False, len(listdir)]
+            return False, len(listdir), listdir
 
         elif count is None:
             self.log(
@@ -77,7 +77,7 @@ class FileExplorer(QtCore.QObject):
                 ), log_type=LogType.DEBUG
             )
 
-            return [False, 0]
+            return False, 0, []
 
         else:
             self.log(
@@ -86,7 +86,7 @@ class FileExplorer(QtCore.QObject):
                 ), log_type=LogType.ERROR
             )
 
-            return [True, count]
+            return True, count, file_name_failed
 
     def move_files(self, path_from, path_to, filter=None, name_of_doc='все'):
         """Перемещение файлов из одного пути в другой, с проверкой наличия в новой директории"""
@@ -125,14 +125,14 @@ class FileExplorer(QtCore.QObject):
                                  file_name), log_type=LogType.ERROR)
 
         # Проверка, переместились ли файлы
-        count = self.check_move_or_copy_files(listdir, path_from, path_to)
+        count,file_name_failed = self.check_move_or_copy_files(listdir, path_from, path_to)
         if count == 0:
             self.log(
                 "Все файлы [{}] в количестве {} успешно перемещены из [{}] в [{}]".format(
                     name_of_doc, len(listdir), path_from, path_to
                 ), log_type=LogType.DEBUG
             )
-            return [False, len(listdir)]
+            return False, len(listdir), listdir
 
         elif count is None:
             self.log(
@@ -141,7 +141,7 @@ class FileExplorer(QtCore.QObject):
                 ), log_type=LogType.DEBUG
             )
 
-            return [False, 0]
+            return False, 0, []
 
         else:
             self.log(
@@ -149,7 +149,7 @@ class FileExplorer(QtCore.QObject):
                     count, name_of_doc, path_from, path_to
                 ), log_type=LogType.ERROR
             )
-            return [True, count]
+            return True, count, file_name_failed
 
     def copy_files(self, path_from, path_to, filter=None, name_of_doc='все'):
         """Копирование файлов из одной директории в другую.
@@ -171,6 +171,9 @@ class FileExplorer(QtCore.QObject):
                             if os.path.exists(path_to + "\\" + file_name) == False:
                                 shutil.copy2(file_path, path_to)
                                 listdir.append(file_name)
+                            elif name_of_doc == 'log':
+                                shutil.copy2(file_path, path_to)
+                                listdir.append(file_name)
                             else:
                                 self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
 
@@ -189,7 +192,7 @@ class FileExplorer(QtCore.QObject):
                                  file_name), log_type=LogType.ERROR)
 
         # Проверка, скопировались ли файлы
-        count = self.check_move_or_copy_files(listdir, path_from, path_to)
+        count, file_name_failed = self.check_move_or_copy_files(listdir, path_from, path_to)
         if count == 0:
             self.log(
                 "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
@@ -197,7 +200,7 @@ class FileExplorer(QtCore.QObject):
                 ), log_type=LogType.DEBUG
             )
 
-            return [False, len(listdir)]
+            return False, len(listdir), listdir
 
         elif count is None:
             self.log(
@@ -206,7 +209,7 @@ class FileExplorer(QtCore.QObject):
                 ), log_type=LogType.DEBUG
             )
         
-            return [False, 0]
+            return False, 0, []
 
         else:
             self.log(
@@ -215,7 +218,7 @@ class FileExplorer(QtCore.QObject):
                 ), log_type=LogType.ERROR
             )
 
-            return [True, count]
+            return True, count, file_name_failed
 
     def delete_files(self, path_from, filter=None, name_of_doc=''):
         """Удаление файлов из директории.
@@ -250,21 +253,25 @@ class FileExplorer(QtCore.QObject):
         # Проверка, удалились ли файлы
 
         delete_list_dir = os.listdir(path=path_from)
+        not_deleted_files = []
         count = 0
         for file_name in listdir:
             try:
                 delete_list_dir.index(file_name)
                 count += 1
+                not_deleted_files.append(file_name)
             except ValueError as ex:
                 pass
 
         if count == 0:
             self.log("Все файлы успешно удалены", log_type=LogType.DEBUG)
+            return False,0, []
 
         else:
             self.log(
                 "Не удалось удалить {count} файлов".format(count=count), log_type=LogType.ERROR
             )
+            return True,len(not_deleted_files),not_deleted_files
 
     def decode_files(self, decoder, arm_buf, dir_log):
         """Расшифровка файлов по указанному пути, с проверкой"""
@@ -292,6 +299,7 @@ class FileExplorer(QtCore.QObject):
     def check_move_or_copy_files(self, listdir_from, path_from, path_to):
         """Проверка переместились ли файлы в нужную дерикторию"""
         count = 0
+        file_name_failed = []
         if len(listdir_from) != 0:
             move_to_listdir = os.listdir(path=path_to)
             for file_name in listdir_from:
@@ -299,13 +307,17 @@ class FileExplorer(QtCore.QObject):
                     move_to_listdir.index(file_name)
                 except ValueError as ex:
                     count += 1
+                    file_name_failed.append(file_name)
 
             if count == 0:
-                return count
+                return 0, []
 
             elif count > 0:
-                return count
+                return count, file_name_failed
+
+        return 0, []
 
     def log(self, message, log_type):
         self.log_str.emit(message, log_type)
         print(message)
+
