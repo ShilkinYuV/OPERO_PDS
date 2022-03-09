@@ -15,5 +15,5 @@ CLI = dir_armkbr + "\\Exg\\cli"
 trans_disk = "x:\\"
 puds_disk = "w:\\"
 
-vpn_settgins_folder = 'A:\\ProgramData\\Cisco\\Cisco AnyConnect Secure Mobility Client\\'
+vpn_settgins_folder = dir_armkbr + '\\Cfg\\'
 

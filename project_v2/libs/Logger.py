@@ -22,11 +22,12 @@ class Logger(QtCore.QObject):
             self.form_log = form_log_path
 
         self.file_log_path = file_log_path
+        self.prev_day = datetime.now().day
 
         if self.file_log_path != None:
-            self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(file_log_path,datetime.now().strftime("%Y%m%d")))
+            self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
 
-            self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(file_log_path,datetime.now().strftime("%Y%m%d")))
+            self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
 
     def setup_logger(self,name, log_file, level=logging.INFO):
         """To setup as many loggers as you want"""
@@ -43,6 +44,12 @@ class Logger(QtCore.QObject):
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         current_datetime_mls = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
+        if self.prev_day != datetime.now().day:
+            if self.file_log_path != None:
+                self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
+                self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
+                self.prev_day = datetime.now().day
+
         if log_type == LogType.DEBUG:
             if self.file_log_path is not None:
                 self.back.info("INFO|{}|{}".format(
@@ -51,7 +58,7 @@ class Logger(QtCore.QObject):
         elif log_type == LogType.FILES:
             if self.file_log_path is not None:
                 self.form_log.append(
-                    "<font color='green'>{message}</font>".format(
+                    "<font color='lightgreen'>{message}</font>".format(
                         date=current_datetime, message=message
                     )
                 )
@@ -85,7 +92,7 @@ class Logger(QtCore.QObject):
 
             if self.file_log_path is not None:
                 self.back.error("ERROR|{}|{}".format(
-                    current_datetime_mls, message), stack_info=True)
+                    current_datetime_mls, message))
                 self.visual.error("ERROR|{}|{}".format(
                     current_datetime_mls, message))
 

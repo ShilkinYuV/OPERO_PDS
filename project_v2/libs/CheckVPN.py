@@ -47,6 +47,7 @@ class CheckVPN(QThread):
                     elementXML = str(elem.firstChild.data)
                     ip = regular.match(elementXML).groups('ip')
                     if self.ping(str(ip[0])) == False:
+                        self.log_str.emit("", LogType.INFO)
                         self.log_str.emit("Vpn соединение недоступно", LogType.ERROR)
                         
             sleep(600)
