@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import re
 from time import sleep
 from xml.dom import minidom
 from PyQt5.QtCore import QThread
@@ -35,15 +36,17 @@ class CheckVPN(QThread):
     def run(self):
         """Проверка доступности хоста"""
         while True:
+            regular = re.compile(r"http:\/\/(?P<ip>.*)\:.*\/get")
             self.fe.check_dir(self.settings_path)
-            if os.path.exists(self.settings_path + 'preferences_global.xml') == False:
-                self.log_str.emit("Не могу найти настройки CISCO VPN", LogType.INFO)
-            if os.path.isfile(self.settings_path + 'preferences_global.xml'):
-                mydoc = minidom.parse(self.settings_path + 'preferences_global.xml')
-                items = mydoc.getElementsByTagName("DefaultHostName")
+            if os.path.exists(self.settings_path + 'arm.cfg') == False:
+                self.log_str.emit("Не могу найти arm.cfg для теста VPN", LogType.INFO)
+            if os.path.isfile(self.settings_path + 'arm.cfg'):
+                mydoc = minidom.parse(self.settings_path + 'arm.cfg')
+                items = mydoc.getElementsByTagName("svk-httpServerFrom")
                 for elem in items:
                     elementXML = str(elem.firstChild.data)
-                    if self.ping(elementXML) == False:
+                    ip = regular.match(elementXML).groups('ip')
+                    if self.ping(str(ip[0])) == False:
                         self.log_str.emit("Vpn соединение недоступно", LogType.ERROR)
                         
             sleep(600)
