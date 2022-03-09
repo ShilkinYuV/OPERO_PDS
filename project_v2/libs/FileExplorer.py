@@ -88,7 +88,7 @@ class FileExplorer(QtCore.QObject):
 
             return True, count, file_name_failed
 
-    def move_files(self, path_from, path_to, filter=None, name_of_doc='все'):
+    def move_files(self, path_from, path_to, filter=None, name_of_doc='все', default_check=True):
         """Перемещение файлов из одного пути в другой, с проверкой наличия в новой директории"""
         self.check_dir(path_to)
 
@@ -99,6 +99,7 @@ class FileExplorer(QtCore.QObject):
         message = "Непредвиденная ошибка при перемещении файлов в " + path_to
 
         listdir = []
+
         # Перемещение файлов
         for file_name in os.listdir(path=path_from):
             if os.path.isfile(path_from + "\\" + file_name):
@@ -125,6 +126,7 @@ class FileExplorer(QtCore.QObject):
                                  file_name), log_type=LogType.ERROR)
 
         # Проверка, переместились ли файлы
+        
         count,file_name_failed = self.check_move_or_copy_files(listdir, path_from, path_to)
         if count == 0:
             self.log(
@@ -151,7 +153,7 @@ class FileExplorer(QtCore.QObject):
             )
             return True, count, file_name_failed
 
-    def copy_files(self, path_from, path_to, filter=None, name_of_doc='все'):
+    def copy_files(self, path_from, path_to, filter=None, name_of_doc='все', default_check=True):
         """Копирование файлов из одной директории в другую.
         Используя регулярное (filter) выражение, можно скопировать определенные файлы"""
         self.check_dir(path_to)
@@ -160,6 +162,9 @@ class FileExplorer(QtCore.QObject):
             regular = re.compile(filter)
 
         listdir = []
+        file_name_failed = []
+        count = 0
+        count_before = 0
         # Копирование файлов
         for file_name in os.listdir(path=path_from):
             file_path = path_from + "\\" + file_name
@@ -167,58 +172,96 @@ class FileExplorer(QtCore.QObject):
             if os.path.isfile(file_path):
                 if filter is not None:
                     if regular.search(file_name.lower()) is not None:
+                        count_before += 1
                         try:
                             if os.path.exists(path_to + "\\" + file_name) == False:
                                 shutil.copy2(file_path, path_to)
                                 listdir.append(file_name)
+                                count+=1
                             elif name_of_doc == 'log':
                                 shutil.copy2(file_path, path_to)
                                 listdir.append(file_name)
                             else:
                                 self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
+                                file_name_failed.append(file_name)
 
                         except Exception as ex:
                             self.log(
                                 message + ' file_name= {}\\{}'.format(path_from, file_name), log_type=LogType.ERROR)
+                            file_name_failed.append(file_name)
                 else:
+                    count_before += 1
                     try:
                         if os.path.exists(path_to + "\\" + file_name) == False:
                             shutil.copy2(file_path, path_to)
                             listdir.append(file_name)
+                            count+=1
                         else:
                                 self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
+                                file_name_failed.append(file_name)
                     except:
                         self.log(message + ' file_name= {}\\{}'.format(path_from,
                                  file_name), log_type=LogType.ERROR)
+                        file_name_failed.append(file_name)
 
         # Проверка, скопировались ли файлы
-        count, file_name_failed = self.check_move_or_copy_files(listdir, path_from, path_to)
-        if count == 0:
-            self.log(
-                "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
-                    name_of_doc, len(listdir), path_from, path_to
-                ), log_type=LogType.DEBUG
-            )
-
-            return False, len(listdir), listdir
-
-        elif count is None:
-            self.log(
-                "Нет файлов [{}] для копирования из [{}] в [{}]".format(
-                    name_of_doc, path_from, path_to
-                ), log_type=LogType.DEBUG
-            )
+        if default_check:
+            count, file_name_failed = self.check_move_or_copy_files(listdir, path_from, path_to)
         
-            return False, 0, []
+            if count == 0:
+                self.log(
+                    "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
+                        name_of_doc, len(listdir), path_from, path_to
+                    ), log_type=LogType.DEBUG
+                )
+
+                return False, len(listdir), listdir
+
+            elif count is None:
+                self.log(
+                    "Нет файлов [{}] для копирования из [{}] в [{}]".format(
+                        name_of_doc, path_from, path_to
+                    ), log_type=LogType.DEBUG
+                )
+            
+                return False, 0, []
+
+            else:
+                self.log(
+                    "Не удалось скопировать {} файлов [{}] из [{}] в [{}]".format(
+                        count, name_of_doc, path_from, path_to
+                    ), log_type=LogType.ERROR
+                )
+
+                return True, count, file_name_failed
 
         else:
-            self.log(
-                "Не удалось скопировать {} файлов [{}] из [{}] в [{}]".format(
-                    count, name_of_doc, path_from, path_to
-                ), log_type=LogType.ERROR
-            )
+            if count == count_before:
+                self.log(
+                    "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
+                        name_of_doc, len(listdir), path_from, path_to
+                    ), log_type=LogType.DEBUG
+                )
 
-            return True, count, file_name_failed
+                return False, len(listdir), listdir
+
+            elif count is None:
+                self.log(
+                    "Нет файлов [{}] для копирования из [{}] в [{}]".format(
+                        name_of_doc, path_from, path_to
+                    ), log_type=LogType.DEBUG
+                )
+            
+                return False, 0, []
+
+            else:
+                self.log(
+                    "Не удалось скопировать {} файлов [{}] из [{}] в [{}]".format(
+                        count, name_of_doc, path_from, path_to
+                    ), log_type=LogType.ERROR
+                )
+
+                return True, count, file_name_failed
 
     def delete_files(self, path_from, filter=None, name_of_doc=''):
         """Удаление файлов из директории.

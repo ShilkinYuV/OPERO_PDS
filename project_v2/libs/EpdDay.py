@@ -199,11 +199,11 @@ class EpdDay(QThread):
 
             xml_to_trans_disk_count = 0
             xml_to_trans_docs_list = []
-            err, count,docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml$", name_of_doc='ed.xml')
+            err, count,docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml$", name_of_doc='ed.xml', default_check=False)
             if not err:
                 xml_to_trans_disk_count+=count
                 xml_to_trans_docs_list+=docs
-            err, count, docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.xml')
+            err, count, docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.xml', default_check=False)
             if not err:
                 xml_to_trans_disk_count+=count
                 xml_to_trans_docs_list+=docs
@@ -212,8 +212,12 @@ class EpdDay(QThread):
                 self.log_str.emit("xml успешно скопированы на транспортный диск в кол-ве {}".format(xml_to_trans_disk_count), LogType.INFO)
                 for doc in xml_to_trans_docs_list:
                     self.log_str.emit(doc, LogType.FILES)
+
+                self.update_counts.emit(0, xml_to_trans_disk_count)
+
             else:
                 self.log_str.emit("Нет документов xml для перемещения в архив.", LogType.INFO)
+
 
 
             err, count,docs = self.fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml$", name_of_doc='ed808.xml')
@@ -222,18 +226,18 @@ class EpdDay(QThread):
                     self.log_str.emit("ed808 успешно скопированы в кол-ве {} в {}".format(count, rash), LogType.INFO)
                     for doc in docs:
                         self.log_str.emit(doc, LogType.FILES)
-                     
+                    
                 else:
                      self.log_str.emit("ed808 отсутствуют", LogType.INFO)
 
 
             ed_count = 0
             ed_docs_list = []
-            err, count, docs = self.fe.copy_files(arm_buf, puds_disk + "input", r".*\.ed$", name_of_doc='.eds')
+            err, count, docs = self.fe.copy_files(arm_buf, puds_disk + "input", r".*\.ed$", name_of_doc='.eds', default_check=False)
             if not err:
                 ed_count+=count
                 ed_docs_list+=docs
-            err, count, docs = self.fe.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$", name_of_doc='ed211.eds')
+            err, count, docs = self.fe.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$", name_of_doc='ed211.eds', default_check=False)
             if not err:
                 ed_count+=count
                 ed_docs_list+=docs
@@ -242,6 +246,8 @@ class EpdDay(QThread):
                 self.log_str.emit("ed и eds успешно скопированы в кол-ве {} на диск ПУДС".format(ed_count),LogType.INFO)
                 for doc in ed_docs_list:
                     self.log_str.emit(doc, LogType.FILES)
+            else:
+                self.log_str.emit("Нет документов ed для перемещения на диск ПУДС.", LogType.INFO)
 
             self.fe.delete_files(arm_buf, r".*\.xml$", name_of_doc='.xml')
 

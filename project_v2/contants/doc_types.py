@@ -6,5 +6,6 @@ doc_types = {
     'ZINFSEND':'RDI0MCBFREF1dGhvcj0i',
     'ZONDSEND':'RDk5OSBDcmVhdGlvbkRhdGVUaW1l',
     'ZVPSEND':'RDIxMCB4bWxucz0idXJuOmNici1ydTplZDp2Mi4wIiBFRE5vPSI',
-    'RNPSEND_PUDS': 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0id2luZG93cy0xMjUxIj8+PGVkOlBhY2tldEVQ'
+    'RNPSEND_PUDS': 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0id2luZG93cy0xMjUxIj8+PGVkOlBhY2tldEVQ',
+    'OTVSEND_PUDS': 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0id2luZG93cy0xMjUxIj8+PGVkOkVEMjQ0'
 }

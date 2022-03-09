@@ -81,6 +81,7 @@ class SendDocs(QThread):
                 "Отправлено {} документов {}".format(
                     count, self.doc_type), LogType.INFO
             )
+            self.update_counts.emit(count, 0)
             for doc in docs_list:
                 self.log_str.emit(
                     doc, LogType.FILES
@@ -109,7 +110,7 @@ class SendDocs(QThread):
                             self.elementXML = str(elem.firstChild.data)
                             if self.elementXML.__contains__(rnp):
                                 self.fe.copy_files(
-                                    path_from, path_to, filter=file_name.lower())
+                                    path_from, path_to, filter=file_name.lower(), default_check=False)
                                 self.fe.move_files(
                                     path_from, archive, filter=file_name.lower())
                                 count += 1

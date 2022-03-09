@@ -2,6 +2,7 @@ from re import S
 from xml.dom import minidom
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QSettings
 import os
 
 from libs.EpdNight import NightCicle
@@ -11,6 +12,7 @@ from libs.CheckDirs import CheckDirs
 from libs.Logger import Logger, CheckConnection
 from libs.LogType import LogType
 from libs.CheckVPN import CheckVPN
+from libs.PasswordNotify import PasswordNotify
 
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
@@ -38,11 +40,15 @@ class MainForm(QtWidgets.QMainWindow):
         super(MainForm, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.settings = QSettings('OIS', app_name , self)
+
         self.ui.textEdit.setReadOnly(True)
         self.ui.day.clicked.connect(self.epd_day2_start)
         self.ui.chekDocuments.clicked.connect(self.check_dirs)
         self.ui.night.clicked.connect(self.epd_night)
         self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
+        self.ui.lbl_password_days.clicked.connect(self.reset_password_days)
 
         self.ui.OTVSEND.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"],False))
         self.ui.RNPSEND.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND"],False))
@@ -52,7 +58,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.ZONDSEND.clicked.connect(lambda: self.send_docs(doc_types["ZONDSEND"],False))
         self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"],False))
 
-        self.ui.OTVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"],True))
+        self.ui.OTVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND_PUDS"],True))
         self.ui.RNPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND_PUDS"],True))
         self.ui.OTZVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTZVSEND"],True))
         self.ui.PESSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["PESSEND"],True))
@@ -61,11 +67,12 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.ZVPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"],True))
 
 
+        self.ui.pbutton_load_log.clicked.connect(self.read_local_log)
         self.setWindowTitle("{} - v{}".format(app_name, app_version))
         self.day_thread = None
 
         self.about_form = None
-        self.ui.pushButton_2.clicked.connect(self.open_about_form)
+        self.ui.pbutton_show_about.clicked.connect(self.open_about_form)
         self.press_button = False
 
         self.logger = Logger(file_log_path=dir_log, form_log_path=self.ui.textEdit)
@@ -78,11 +85,70 @@ class MainForm(QtWidgets.QMainWindow):
         self.epd_night()
         self.start_check_vpn()
 
-        self.count_output = 0
-        self.count_input = 0
+        if self.settings.value('count_output') is not None: 
+            self.count_output = int(self.settings.value('count_output'))
+        else:
+            self.count_output = 0
+        
+
+        if self.settings.value('count_input') is not None: 
+            self.count_input = int(self.settings.value('count_input'))
+        else:
+            self.count_input = 0
+        
+        if self.settings.value('last_count_day') is not None: 
+            self.last_count_day = int(self.settings.value('last_count_day'))
+        else:
+            self.last_count_day = datetime.now().day
+
+        if self.settings.value('password_days_count') is not None: 
+            self.password_days_count = int(self.settings.value('password_days_count'))
+        else:
+            self.password_days_count = 45
+
+        self.ui.lbl_output_count.setText('Отправлено: {}'.format(self.count_output))
+        self.ui.lbl_inptut_count.setText('Загружено: {}'.format(self.count_input))
+        self.ui.lbl_password_days.setText('Дней до смены пароля:  {}'.format(self.password_days_count))
+
+        self.password_notify_start()
+                
+    def reset_password_days(self):
+        reply = QMessageBox.question(self, "Сброс счетчика", "Сбросить счетчик дней до смены пароля?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            self.password_days_count = 45
+            self.settings.setValue('password_days_count', self.password_days_count)
+            self.ui.lbl_password_days.setText('Дней до смены пароля:  {}'.format(self.password_days_count))    
+    
+    @QtCore.pyqtSlot(int)
+    def update_password_days(self, minus):
+        self.password_days_count -= minus
+        self.settings.setValue('password_days_count', self.password_days_count)
+        self.ui.lbl_password_days.setText('Дней до смены пароля:  {}'.format(self.password_days_count))
+        if self.password_days_count <= 3:
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Information)
+            if self.password_days_count == 1:
+                days = "день"
+            elif self.password_days_count >=2 and self.password_days_count <=4:
+                days = "дня"
+            else:
+                days = "дней"
+            msg.setText("Пароль истекает через {} {}".format(self.password_days_count, days))
+            msg.setWindowTitle("Требуется смена пароля!")
+
+            msg.show()
+
+    def password_notify_start(self):
+        """Проверка дней до смены пароля"""
+        self.password_notify = PasswordNotify()
+        self.password_notify.pswrd_days_count.connect(self.update_password_days)
+        self.password_notify.start()
 
     def read_local_log(self):
         """Чтение лога, при наличии и вывод в визуальную форму"""
+        self.ui.textEdit.clear()
         path = (
             dir_log + "\\1\\" + datetime.now().strftime("%Y%m%d") + "\\" + "visual.log"
         )
@@ -93,7 +159,6 @@ class MainForm(QtWidgets.QMainWindow):
             if num_lines == 0:
                 self.ui.textEdit.append('По пути "{}" пустой лог '.format(path))
             else:
-                print("start loop")
                 for line in log:
                     # Делим строчку лога на тип, дату и сообщение
                     splitted = line.split("|")
@@ -138,7 +203,7 @@ class MainForm(QtWidgets.QMainWindow):
                             "CheckConnection"
                         ):
                             self.ui.textEdit.append(
-                                "<font color='green'>{message}</font>".format(
+                                "<font color='lightgreen'>{message}</font>".format(
                                     date=date_time, message=message
                                 )
                             )
@@ -214,9 +279,18 @@ class MainForm(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot(int, int)
     def update_counts(self, output, input):
-        self.count_output += output
-        self.count_input  += input
+        if self.last_count_day != datetime.now().day:
+            self.count_output = 0
+            self.count_input  = 0
+            self.last_count_day = datetime.now().day
+        else:
+            self.count_output += output
+            self.count_input  += input
 
+        self.settings.setValue('count_output', int(self.count_output))
+        self.settings.setValue('count_input', int(self.count_input))
+        self.settings.setValue('last_count_day', int(self.last_count_day))
+        
         self.ui.lbl_output_count.setText('Отправлено: {}'.format(self.count_output))
         self.ui.lbl_inptut_count.setText('Загружено: {}'.format(self.count_input))
 
@@ -231,7 +305,6 @@ class MainForm(QtWidgets.QMainWindow):
 
         else:
             self.day_thread.confirm = False
-
 
     def start_check_vpn(self):
         self.check_vpn = CheckVPN(self, settings_path=vpn_settgins_folder)
