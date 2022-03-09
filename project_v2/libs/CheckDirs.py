@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from re import L
 from xml.dom import minidom
 from PyQt5.QtCore import QThread
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -18,11 +19,12 @@ from contants.path_constants import (
 )
 
 from libs.FileExplorer import FileExplorer
+from libs.LogType import LogType
 
 
 class CheckDirs(QThread):
 
-    log_str = QtCore.pyqtSignal(str, bool, bool)
+    log_str = QtCore.pyqtSignal(str, LogType)
 
     def __init__(self, form, doc_types):
         QThread.__init__(self)
@@ -33,6 +35,7 @@ class CheckDirs(QThread):
 
     def run(self):
         """Проверка наличия документов для отправки"""
+        self.form.ui.chekDocuments.setDisabled(True)
 
         current_date = datetime.now().strftime("%d%m%Y")
 
@@ -45,34 +48,40 @@ class CheckDirs(QThread):
         rnp_folders={vchera: "АСФК", vcheran: "АСФК", puds_dir: "ПУДС"}
 
         isEmpty = True
-        for k, v in self.doc_types.items():
-            for folder, doc_from in rnp_folders.items():
-                count = 0
-                self.fe.check_dir(folder)
-                for file_name in os.listdir(folder):
-                    file_path = folder + "\\" + file_name
-                    if os.path.isfile(file_path):
-                        mydoc = minidom.parse(file_path)
-                        items = mydoc.getElementsByTagName("sen:Object")
-                        for elem in items:
-                            self.elementXML = str(elem.firstChild.data)
+
+        for folder, doc_from in rnp_folders.items():
+            count_doc_types = {k:0 for k,v in self.doc_types.items()}
+            self.fe.check_dir(folder)
+            for file_name in os.listdir(folder):
+                file_path = folder + "\\" + file_name
+                if os.path.isfile(file_path):
+                    mydoc = minidom.parse(file_path)
+                    items = mydoc.getElementsByTagName("sen:Object")
+                    for elem in items:
+                        self.elementXML = str(elem.firstChild.data)
+                        for k,v in self.doc_types.items():
                             if self.elementXML.__contains__(v):
                                 isEmpty = False
-                                count += 1
-                if count != 0:
+                                count_doc_types[k] += 1
+
+            for k,v in count_doc_types.items():
+                if v != 0:
                     self.log_str.emit(
-                        "Найдены документы типа - {}, в количестве {} из {}".format(k, count, doc_from), False, False
-                    )
+                            "Найдены документы для отправки типа - {}, в количестве {} из {}".format(k, v, doc_from), LogType.INFO
+                        )    
 
         [count, confirm_count] = self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv")
         
 
         if count != 0:
             isEmpty = False
-            self.log_str.emit("Найдены документы для отправки ЭПД в количестве {}".format(count), False, False)
+            self.log_str.emit("Найдены документы для загрузки ЭПД в количестве {}".format(count), LogType.INFO)
 
         if confirm_count != 0:
-            self.log_str.emit("Найдены квитки по директории ЭПД в количестве {}".format(confirm_count), False, False)
+            self.log_str.emit("Найдены квитки по директории ЭПД в количестве {}".format(confirm_count), LogType.INFO)
 
         if isEmpty:
-            self.log_str.emit("Документов для отправки не найдено", False, False)
+            self.log_str.emit("Документов для загрузки не найдено", LogType.INFO)
+
+        self.form.ui.chekDocuments.setDisabled(False)
+        

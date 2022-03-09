@@ -19,30 +19,33 @@ from contants.path_constants import (
 )
 
 from libs.FileExplorer import FileExplorer
+from libs.LogType import LogType
 
 
 class CheckVPN(QThread):
 
-    log_str = QtCore.pyqtSignal(str, bool, bool)
+    log_str = QtCore.pyqtSignal(str, LogType)
 
-    def __init__(self, form, hosts):
+    def __init__(self, form, settings_path):
         QThread.__init__(self)
         self.form = form
-        self.hosts = hosts
+        self.settings_path = settings_path
+        self.fe = FileExplorer()
 
     def run(self):
         """Проверка доступности хоста"""
         while True:
-            isOneOfHostsPings = False
-            for host in self.hosts:
-                if self.ping(host):
-                    isOneOfHostsPings = True
-                else:
-                    pass
-
-            if isOneOfHostsPings == False:
-                self.log_str.emit("Vpn соединение недоступно", True, False)
-
+            self.fe.check_dir(self.settings_path)
+            if os.path.exists(self.settings_path + 'preferences_global.xml') == False:
+                self.log_str.emit("Не могу найти настройки CISCO VPN", LogType.INFO)
+            if os.path.isfile(self.settings_path + 'preferences_global.xml'):
+                mydoc = minidom.parse(self.settings_path + 'preferences_global.xml')
+                items = mydoc.getElementsByTagName("DefaultHostName")
+                for elem in items:
+                    elementXML = str(elem.firstChild.data)
+                    if self.ping(elementXML) == False:
+                        self.log_str.emit("Vpn соединение недоступно", LogType.ERROR)
+                        
             sleep(600)
 
     def ping(self, host):

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/icon/bank.ico</normaloff>:/icon/bank.ico</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(45, 59, 68);
 color: white;

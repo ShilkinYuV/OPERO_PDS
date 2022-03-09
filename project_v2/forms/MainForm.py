@@ -8,8 +8,8 @@ from libs.EpdNight import NightCicle
 from libs.EpdDay import EpdDay
 from libs.SendDocs import SendDocs
 from libs.CheckDirs import CheckDirs
-from libs.FileExplorer import FileExplorer
 from libs.Logger import Logger, CheckConnection
+from libs.LogType import LogType
 from libs.CheckVPN import CheckVPN
 
 from ui_forms.MainWindow import Ui_MainWindow
@@ -25,6 +25,7 @@ from contants.path_constants import (
     trans_disk,
     puds_disk,
     CLI,
+    vpn_settgins_folder
 )
 from contants.doc_types import doc_types
 from contants.app_constants import app_name, app_version
@@ -52,7 +53,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.ZVPSEND.clicked.connect(lambda: self.send_docs(doc_types["ZVPSEND"],False))
 
         self.ui.OTVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTVSEND"],True))
-        self.ui.RNPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND"],True))
+        self.ui.RNPSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["RNPSEND_PUDS"],True))
         self.ui.OTZVSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["OTZVSEND"],True))
         self.ui.PESSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["PESSEND"],True))
         self.ui.ZINFSEND_PUDS.clicked.connect(lambda: self.send_docs(doc_types["ZINFSEND"],True))
@@ -75,12 +76,12 @@ class MainForm(QtWidgets.QMainWindow):
         self.check_connection()
         self.read_local_log()
         self.epd_night()
-        self.start_check_vpn(hosts=['10.100.0.3', '10.100.0.4'])
+        self.start_check_vpn()
 
     def read_local_log(self):
         """Чтение лога, при наличии и вывод в визуальную форму"""
         path = (
-            dir_log + "\\1\\" + datetime.now().strftime("%Y%m%d") + "\\" + "sample.log"
+            dir_log + "\\1\\" + datetime.now().strftime("%Y%m%d") + "\\" + "visual.log"
         )
         if os.path.isfile(path):
             log = open(path, "r")
@@ -122,6 +123,15 @@ class MainForm(QtWidgets.QMainWindow):
                                 )
                             )
 
+                        elif type.__contains__("WARNING") and not message.__contains__(
+                            "CheckConnection"
+                        ):
+                            self.ui.textEdit.append(
+                                "<font color='orange'>{date} {message}</font>".format(
+                                    date=date_time, message=message
+                                )
+                            )
+
         else:
             self.ui.textEdit.append('По пути "{}" отсутствует лог '.format(path))
 
@@ -129,7 +139,6 @@ class MainForm(QtWidgets.QMainWindow):
         """Проверка соединения"""
         self.check_conn = CheckConnection(dir_log, _logger=self.logger)
         self.check_conn.setDaemon(True)
-        # self.check_conn.log_str.connect(self.logger.log)
         self.check_conn.start()
 
     def open_about_form(self):
@@ -138,22 +147,22 @@ class MainForm(QtWidgets.QMainWindow):
 
     def send_docs(self, rnp, isFromPuds):
         """Отправка доков по определенным РНП"""
-        self.log('',False, False)
+        self.log('',LogType.INFO)
         sender = self.sender()
-        self.sendDocs = SendDocs(form=self, rnp=rnp, doc_type=sender.text(), isFromPuds=isFromPuds)
+        self.sendDocs = SendDocs(form=self,button=self.sender(), rnp=rnp, doc_type=sender.text(), isFromPuds=isFromPuds)
         self.sendDocs.log_str.connect(self.log)
         self.sendDocs.start()
 
     def check_dirs(self):
         """Проверка директорий на наличие файлов"""
-        self.log('',False, False)
+        self.log('',LogType.INFO)
         self.check_dirs = CheckDirs(form=self,doc_types=doc_types)
         self.check_dirs.log_str.connect(self.log)
         self.check_dirs.start()
 
     def epd_day2_start(self):
         """ЭПД дневное"""
-        self.log('',False, False)
+        self.log('',LogType.INFO)
         self.day_thread = EpdDay(form=self)
         self.day_thread.log_str.connect(self.log)
         self.day_thread.confir_message.connect(self.accept_form)
@@ -185,9 +194,9 @@ class MainForm(QtWidgets.QMainWindow):
             else:
                 pass
 
-    @QtCore.pyqtSlot(str, bool, bool)
-    def log(self, message, isError, onlyInFile):
-        self.logger.log(message, isError, onlyInFile)
+    @QtCore.pyqtSlot(str, LogType)
+    def log(self, message, log_type):
+        self.logger.log(message, log_type=log_type)
 
     @QtCore.pyqtSlot(str, str)
     def accept_form(self, title, message):
@@ -202,8 +211,8 @@ class MainForm(QtWidgets.QMainWindow):
             self.day_thread.confirm = False
 
 
-    def start_check_vpn(self, hosts):
-        self.check_vpn = CheckVPN(self, hosts=hosts)
+    def start_check_vpn(self):
+        self.check_vpn = CheckVPN(self, settings_path=vpn_settgins_folder)
         self.check_vpn.log_str.connect(self.log)
         self.check_vpn.start()
 

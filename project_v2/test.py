@@ -1,16 +1,10 @@
+from asyncio.log import logger
 import os
 import subprocess
 
-# req = os.system("ping 192.158.2.4")
+from libs.Logger import Logger
+from libs.LogType import LogType
 
+logger = Logger("B:\\MCI\\LOG")
 
-DNULL = open(os.devnull, 'w')
-def ping(host):
-    response = os.system("ping " + host)
-    if response == 0:
-        return True
-    else:
-        return False
-
-
-ping("google.com")
+logger.log("Debug ", log_type=LogType.DEBUG)

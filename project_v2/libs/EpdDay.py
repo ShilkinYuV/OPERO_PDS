@@ -17,11 +17,12 @@ from contants.path_constants import (
 )
 
 from libs.FileExplorer import FileExplorer
+from libs.LogType import LogType
 
 
 class EpdDay(QThread):
 
-    log_str = QtCore.pyqtSignal(str, bool, bool)
+    log_str = QtCore.pyqtSignal(str, LogType)
     confir_message = QtCore.pyqtSignal(str, str)
 
     def __init__(self, form):
@@ -32,7 +33,7 @@ class EpdDay(QThread):
         self.confirm = None
 
     def run(self):
-
+        self.form.ui.day.setDisabled(True)
         now_hour = datetime.now().hour
         now_minutes = datetime.time(datetime.now()).__str__()[3]
 
@@ -55,7 +56,7 @@ class EpdDay(QThread):
                     self.confirm == None
                     self.stage1()
                 else:
-                    self.log_str.emit("Выполнение ЭПД день отменено", False, False)
+                    self.log_str.emit("Выполнение ЭПД день отменено", LogType.INFO)
                     self.confirm = None
 
         self.form.ui.day.setDisabled(False)
@@ -79,34 +80,60 @@ class EpdDay(QThread):
         dd = datetime.now().strftime("%d")
 
         if self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv")[0] == 0:
-            self.log_str.emit("Нет файлов к отправке!", False, False)
+            self.log_str.emit("Нет файлов к отправке!", LogType.INFO)
 
         else:
-            self.fe.move_files(
+            # Проверка ED211 документов
+            count_ed211 = 0
+            [err, count] = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"01.*\.ed$",
                 name_of_doc='ed2114_01'
             )
-            self.fe.move_files(
+
+            if not err:
+                count_ed211+=count
+
+            [err, count] = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"02.*\.ed$",
                 name_of_doc='ed2114_02'
             )
-            self.fe.move_files(
+
+            if not err:
+                count_ed211+=count
+
+            [err, count] = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"03.*\.ed$",
                 name_of_doc='ed2114_03'
             )
-            self.fe.move_files(
+
+            if not err:
+                count_ed211+=count
+
+            [err, count] = self.fe.move_files(
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"04.*\.ed$",
                 name_of_doc='ed2114_04'
             )
-            self.fe.move_files(rcv, bvp, filter=r".*ed211" + str(dd) + r".*\.eds$", name_of_doc='ed211')
+
+            if not err:
+                count_ed211+=count
+
+            [err, count] = self.fe.move_files(rcv, bvp, filter=r".*ed211" + str(dd) + r".*\.eds$", name_of_doc='ed211')
+
+            if not err:
+                count_ed211+=count
+            
+            if count_ed211 != 0:
+                self.log_str.emit("Документы ED211 успешно перемещены в количестве {} в {}".format(count_ed211, bvp), LogType.INFO)
+            else:
+                self.log_str.emit("Нет документов ED211 для перемещения.", LogType.INFO)
 
             self.fe.check_dir(dir_log)
             self.fe.check_dir(dir_armkbr + "\\exg\\rcv")
@@ -116,18 +143,36 @@ class EpdDay(QThread):
             self.fe.check_dir(dir_archive)
             self.fe.check_dir(arm_buf)
 
-            self.fe.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
+            [err, count] = self.fe.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
 
-            self.fe.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
+            if not err:
+                self.log_str.emit("Квитки успешно перемещены в архив в количестве {}".format(count), LogType.INFO)
+
+            [err, count] = self.fe.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
+
+            if not err:
+                self.log_str.emit("Файлы успешно перемещены в буфер в кол-ве {}".format(count), LogType.INFO)
 
             self.fe.decode_files(unb64_rabis, arm_buf, dir_log)
 
             arc_dir = dir_archive + "\\" + current_date + "\\uarm3\\inc\\ed"
 
             self.fe.check_dir(arc_dir)
+            
+            arc_xml_count = 0
 
-            self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='xml')
-            self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='xml')
+            [err, count] = self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='xml')
+            if not err:
+                arc_xml_count+=count
+
+            [err, count] = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='e211.ed.xml')
+            if not err:
+                arc_xml_count+=count
+
+            if arc_xml_count != 0:
+                self.log_str.emit("xml успешно скопированы в архив в кол-ве {} в {}".format(arc_xml_count, arc_dir), LogType.INFO)
+            else:
+                self.log_str.emit("Нет документов xml для перемещения в архив.", LogType.INFO)
 
             trans_disk_path = trans_disk + "IN_OEBS_BIK\\044525000"
 
@@ -135,16 +180,45 @@ class EpdDay(QThread):
 
             self.fe.check_dir(rash)
 
-            self.fe.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml$", name_of_doc='ed.xml')
-            self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.xml')
-            self.fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml$", name_of_doc='ed808.xml')
+            xml_to_trans_disk_count = 0
+            [err, count] = self.fe.copy_files(arm_buf, trans_disk_path, r".*\.ed\.xml$", name_of_doc='ed.xml')
+            if not err:
+                xml_to_trans_disk_count+=count
+            [err, count] = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.xml')
+            if not err:
+                xml_to_trans_disk_count+=count
 
-            self.fe.copy_files(arm_buf, puds_disk + "input", r".*\.ed$", name_of_doc='.eds')
-            self.fe.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$", name_of_doc='ed211.eds')
+            if xml_to_trans_disk_count != 0:
+                self.log_str.emit("xml успешно скопированы на транспортный диск в кол-ве {}".format(xml_to_trans_disk_count), LogType.INFO)
+            else:
+                self.log_str.emit("Нет документов xml для перемещения в архив.", LogType.INFO)
+
+
+            [err, count] = self.fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml$", name_of_doc='ed808.xml')
+            if not err:
+                if count!=0:
+                     self.log_str.emit("ed808 успешно скопированы в кол-ве {} в {}".format(count, rash), LogType.INFO)
+                else:
+                     self.log_str.emit("ed808 отсутствуют", LogType.INFO)
+
+
+            ed_count = 0
+            [err, count] = self.fe.copy_files(arm_buf, puds_disk + "input", r".*\.ed$", name_of_doc='.eds')
+            if not err:
+                ed_count+=count
+            [err, count] = self.fe.copy_files(arm_buf, puds_disk + "input", r".*ed211.*\.eds$", name_of_doc='ed211.eds')
+            if not err:
+                ed_count+=count
+
+            if count!=0:
+                self.log_str.emit("Ed успешно скопированы в кол-ве {} на диск ПУДС".format(ed_count),LogType.INFO)
 
             self.fe.delete_files(arm_buf, r".*\.xml$", name_of_doc='.xml')
 
-            self.fe.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
+            [err, count] = self.fe.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
+            if not err:
+                if count!=0:
+                    self.log_str.emit("Файлы успешно скопированы из буфера в архив {}".format(dir_armkbr + "\\exg\\rcv\\1"), LogType.INFO)
 
             self.fe.delete_files(arm_buf)
 
@@ -163,5 +237,5 @@ class EpdDay(QThread):
             self.confirm == None
             self.stage2()
         else:
-            self.log_str.emit("Выполнение ЭПД день отменено", False, False)
+            self.log_str.emit("Выполнение ЭПД день отменено", LogType.INFO)
             self.confirm = None

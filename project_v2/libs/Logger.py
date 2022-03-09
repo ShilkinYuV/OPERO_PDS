@@ -2,21 +2,21 @@ from time import sleep
 from datetime import datetime
 import logging
 from threading import Thread
-
-# from PyQt5.qtread import Thread
-
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from libs.FileExplorer import FileExplorer
 
 from contants.path_constants import puds_disk, dir_log
+from libs.LogType import LogType
 
 
 class Logger(QtCore.QObject):
+
     def __init__(self, file_log_path=None, form_log_path=None):
         fe = FileExplorer()
 
-        fe.check_dir(file_log_path + "\\1\\" + datetime.now().strftime("%Y%m%d") + "\\")
+        fe.check_dir(file_log_path + "\\1\\" +
+                     datetime.now().strftime("%Y%m%d") + "\\")
 
         if form_log_path is not None:
             self.form_log = form_log_path
@@ -24,48 +24,74 @@ class Logger(QtCore.QObject):
         self.file_log_path = file_log_path
 
         if self.file_log_path != None:
-            logging.basicConfig(
-                filename=file_log_path
-                + "\\1\\"
-                + datetime.now().strftime("%Y%m%d")
-                + "\\"
-                + "sample.log",
-                level=logging.INFO,
-            )
+            self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(file_log_path,datetime.now().strftime("%Y%m%d")))
 
-    def log(self, message, isError=False, onlyInFile=False):
+            self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(file_log_path,datetime.now().strftime("%Y%m%d")))
+
+    def setup_logger(self,name, log_file, level=logging.INFO):
+        """To setup as many loggers as you want"""
+
+        handler = logging.FileHandler(log_file)
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        logger.addHandler(handler)
+
+        return logger
+
+    def log(self, message, log_type: LogType.DEBUG):
         """Функция логирования, со своими фичами"""
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         current_datetime_mls = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
-        if isError:
-            if onlyInFile == False:
-                if message == "" or message == " ":
-                    self.form_log.append("")
-                else:
-                    self.form_log.append(
-                        "<font color='red'>{date} {message}</font>".format(
-                            date=current_datetime, message=message
-                        )
+        if log_type == LogType.DEBUG:
+            if self.file_log_path is not None:
+                self.back.info("INFO|{}|{}".format(
+                    current_datetime_mls, message))
+
+        elif log_type == LogType.INFO:
+            if message == "" or message == " ":
+                self.form_log.append("")
+            else:
+                self.form_log.append(
+                    "<font color='white'>{date} {message}</font>".format(
+                        date=current_datetime, message=message
                     )
+                )
+            if self.file_log_path is not None:
+                self.visual.info("INFO|{}|{}".format(current_datetime_mls, message))
+                self.back.info("INFO|{}|{}".format(current_datetime_mls, message))
+
+        elif log_type == LogType.ERROR:
+            if message == "" or message == " ":
+                self.form_log.append("")
+            else:
+                self.form_log.append(
+                    "<font color='red'>{date} {message}</font>".format(
+                        date=current_datetime, message=message
+                    )
+                )
 
             if self.file_log_path is not None:
-                logging.error("|{}|{}".format(current_datetime_mls, message))
+                self.back.error("ERROR|{}|{}".format(
+                    current_datetime_mls, message), stack_info=True)
+                self.visual.error("ERROR|{}|{}".format(
+                    current_datetime_mls, message))
 
-        else:
-            if onlyInFile == False:
-                if message == "" or message == " ":
-                    self.form_log.append("")
-                else:
-                    self.form_log.append(
-                        "<font color='white'>{date} {message}</font>".format(
-                            date=current_datetime, message=message
-                        )
+        elif log_type == LogType.WARNING:
+            if message == "" or message == " ":
+                self.form_log.append("")
+            else:
+                self.form_log.append(
+                    "<font color='orange'>{date} {message}</font>".format(
+                        date=current_datetime, message=message
                     )
+                )
 
             if self.file_log_path is not None:
-                logging.info("|{}|{}".format(current_datetime_mls, message))
-
+                self.back.warning("WARNING|{}|{}".format(
+                    current_datetime_mls, message))
+                self.visual.warning("WARNING|{}|{}".format(
+                    current_datetime_mls, message))
 
 class CheckConnection(Thread):
     def __init__(self, log_path, _logger):
@@ -82,7 +108,7 @@ class CheckConnection(Thread):
         while self.work:
             print("checkConnection")
             currentDate = datetime.now()
-            self.logger.log("CheckConnectionn", onlyInFile=True)
+            self.logger.log("CheckConnectionn", LogType.DEBUG)
 
             curr_log = self.log_path + "\\1\\" + currentDate.strftime("%Y%m%d")
 
@@ -100,14 +126,14 @@ class CheckConnection(Thread):
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",
+                    + "\\",filter='sample.log'
                 )
                 fe.copy_files(
                     path_from=curr_log,
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",
+                    + "\\",filter='sample.log'
                 )
 
                 self.prev_log = curr_log
@@ -117,7 +143,7 @@ class CheckConnection(Thread):
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",
+                    + "\\",filter='sample.log'
                 )
 
             sleep(240)
