@@ -13,6 +13,7 @@ from libs.Logger import Logger, CheckConnection
 from libs.LogType import LogType
 from libs.CheckVPN import CheckVPN
 from libs.PasswordNotify import PasswordNotify
+from libs.DiskSpaceChecker import DiskSpaceChecker
 
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
@@ -138,8 +139,10 @@ class MainForm(QtWidgets.QMainWindow):
             'Дней до смены пароля:  {}'.format(self.password_days_count))
 
         self.password_notify_start()
+        self.disk_space_checker_start()
 
     def reset_password_days(self):
+        """Сброс счетчика дней до смены пароля"""
         reply = QMessageBox.question(self, "Сброс счетчика", "Сбросить счетчик дней до смены пароля?",
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
@@ -152,6 +155,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def update_password_days(self):
+        """Слот для обновления счетчика дней смены пароля"""
         self.password_days_count = 45 - \
             (datetime.now() - self.last_date_password).days
         self.ui.lbl_password_days.setText(
@@ -172,11 +176,18 @@ class MainForm(QtWidgets.QMainWindow):
             msg.show()
 
     def password_notify_start(self):
-        """Проверка дней до смены пароля"""
+        """Запуск потока проверки дней до смены пароля"""
         self.password_notify = PasswordNotify()
         self.password_notify.pswrd_days_count.connect(
             self.update_password_days)
         self.password_notify.start()
+
+    def disk_space_checker_start(self):
+        """Запуск потока проверки дней до смены пароля"""
+        self.disk_space_checker = DiskSpaceChecker()
+        self.disk_space_checker.msg_signal.connect(
+            self.free_space_msg)
+        self.disk_space_checker.start()
 
     def read_local_log(self):
         """Чтение лога, при наличии и вывод в визуальную форму"""
@@ -312,12 +323,25 @@ class MainForm(QtWidgets.QMainWindow):
     def log(self, message, log_type):
         self.logger.log(message, log_type=log_type)
 
+    @QtCore.pyqtSlot(str)
+    def free_space_msg(self, message):
+        """Сообщение о свободном пространстве на диске"""
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setText(message)
+        msg.setWindowTitle("Заканчивается свободное место на диске!")
+
+        msg.show()
+
     @QtCore.pyqtSlot(int, int)
     def update_counts(self, output, input):
         if self.last_count_day != datetime.now().day:
             self.count_output = 0
             self.count_input = 0
             self.last_count_day = datetime.now().day
+
+            self.count_output += output
+            self.count_input += input
         else:
             self.count_output += output
             self.count_input += input

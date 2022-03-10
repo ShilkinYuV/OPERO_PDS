@@ -50,7 +50,7 @@ class CheckVPN(QThread):
                         self.log_str.emit("", LogType.INFO)
                         self.log_str.emit("Vpn соединение недоступно", LogType.ERROR)
                         
-            sleep(600)
+            sleep(4200)
 
     def ping(self, host):
         response = os.system("ping " + host)
