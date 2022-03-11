@@ -53,6 +53,10 @@ class CheckVPN(QThread):
                     if self.CheckHost((str(groups[0]),int(groups[1]))) == False:
                         self.log_str.emit("", LogType.SPACE)
                         self.log_str.emit("Vpn соединение недоступно", LogType.ERROR)
+                    else: 
+                        self.log_str.emit("", LogType.SPACE)
+                        self.log_str.emit("Vpn соединение доступно", LogType.INFO)
+                        
             if self.handle_check == True:
                 work = False
                 self.form.ui.pbutton_check_vpn.setDisabled(False)

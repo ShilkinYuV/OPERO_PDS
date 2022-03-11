@@ -75,12 +75,12 @@ class NightCicle(QThread):
 
                     arc_xml_count = 0
                     arc_doc_list = []
-                    err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='xml')
+                    err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='ed.xml')
                     if not err:
                         arc_xml_count+=count
                         arc_doc_list+=docs
 
-                    err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='xml')
+                    err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.eds\.xml$", name_of_doc='ed211.eds.xml')
                     if not err:
                         arc_xml_count+=count
                         arc_doc_list+=docs
@@ -100,7 +100,7 @@ class NightCicle(QThread):
                     if not err:
                         xml_to_trans_disk_count+=count
                         xml_to_trans_disk_list+=docs
-                    err, count, docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.ed.xml', default_check=False)
+                    err, count, docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.eds\.xml$", name_of_doc='ed211.eds.xml', default_check=False)
                     if not err:
                         xml_to_trans_disk_count+=count
                         xml_to_trans_disk_list+=docs
