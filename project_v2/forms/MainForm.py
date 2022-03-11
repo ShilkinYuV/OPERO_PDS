@@ -49,7 +49,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.night.clicked.connect(self.epd_night)
         self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
         self.ui.lbl_password_days.clicked.connect(self.reset_password_days)
-
+        self.ui.pbutton_check_vpn.clicked.connect(self.hanlde_check_vpn)
         self.ui.OTVSEND.clicked.connect(
             lambda: self.send_docs(doc_types["OTVSEND"], False))
         self.ui.RNPSEND.clicked.connect(
@@ -93,12 +93,19 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.night_thread = None
         self.check_vpn = None
-
+        
         self.check_connection()
         self.read_local_log()
         self.epd_night()
         self.start_check_vpn()
 
+        self.load_settings()
+        
+
+        self.password_notify_start()
+        self.disk_space_checker_start()
+
+    def load_settings(self):
         if self.settings.value('count_output') is not None:
             self.count_output = int(self.settings.value('count_output'))
         else:
@@ -129,6 +136,7 @@ class MainForm(QtWidgets.QMainWindow):
                 (datetime.now() - self.last_date_password).days
         else:
             self.last_date_password = datetime.now()
+            self.settings.setValue('last_date_password', self.last_date_password)
             self.password_days_count = 45
 
         self.ui.lbl_output_count.setText(
@@ -138,8 +146,11 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.lbl_password_days.setText(
             'Дней до смены пароля:  {}'.format(self.password_days_count))
 
-        self.password_notify_start()
-        self.disk_space_checker_start()
+    def hanlde_check_vpn(self):
+        self.ui.pbutton_check_vpn.setDisabled(True)
+        self.handle_check_vpn = CheckVPN(self, settings_path=vpn_settgins_folder, handle_check=True)
+        self.handle_check_vpn.log_str.connect(self.log)
+        self.handle_check_vpn.start()
 
     def reset_password_days(self):
         """Сброс счетчика дней до смены пароля"""
@@ -211,46 +222,44 @@ class MainForm(QtWidgets.QMainWindow):
                     date_time = splitted[1].replace(splitted[1][19:26], "")
                     message = splitted[2]
 
-                    if len(message) == 1:
-                        if first is False:
-                            self.ui.textEdit.append(" ")
-                        else:
-                            first = False
-                    else:
-                        if type.__contains__("ERROR") and not message.__contains__(
-                            "CheckConnection"
-                        ):
-                            self.ui.textEdit.append(
-                                "<font color='red'>{date} {message}</font>".format(
-                                    date=date_time, message=message
-                                )
+                    if type.__contains__("ERROR") and not message.__contains__(
+                        "CheckConnection"
+                    ):
+                        self.ui.textEdit.append(
+                            "<font color='red'>{date} {message}</font>".format(
+                                date=date_time, message=message
                             )
+                        )
 
-                        elif type.__contains__("INFO") and not message.__contains__(
-                            "CheckConnection"
-                        ):
-                            self.ui.textEdit.append(
-                                "<font color='white'>{date} {message}</font>".format(
-                                    date=date_time, message=message
-                                )
+                    elif type.__contains__("INFO") and not message.__contains__(
+                        "CheckConnection"
+                    ):
+                        self.ui.textEdit.append(
+                            "<font color='white'>{date} {message}</font>".format(
+                                date=date_time, message=message
                             )
+                        )
 
-                        elif type.__contains__("WARNING") and not message.__contains__(
-                            "CheckConnection"
-                        ):
-                            self.ui.textEdit.append(
-                                "<font color='orange'>{date} {message}</font>".format(
-                                    date=date_time, message=message
-                                )
+                    elif type.__contains__("WARNING") and not message.__contains__(
+                        "CheckConnection"
+                    ):
+                        self.ui.textEdit.append(
+                            "<font color='orange'>{date} {message}</font>".format(
+                                date=date_time, message=message
                             )
-                        elif type.__contains__("FILES") and not message.__contains__(
-                            "CheckConnection"
-                        ):
-                            self.ui.textEdit.append(
-                                "<font color='lightgreen'>{message}</font>".format(
-                                    date=date_time, message=message
-                                )
+                        )
+                    elif type.__contains__("FILES") and not message.__contains__(
+                        "CheckConnection"
+                    ):
+                        self.ui.textEdit.append(
+                            "<font color='lightgreen'>{message}</font>".format(
+                                date=date_time, message=message
                             )
+                        )
+                    elif type.__contains__("SPACE") and not message.__contains__(
+                        "CheckConnection"
+                    ):
+                        self.ui.textEdit.append(" ")
 
         else:
             self.ui.textEdit.append(
@@ -268,7 +277,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def send_docs(self, rnp, isFromPuds):
         """Отправка доков по определенным РНП"""
-        self.log('', LogType.INFO)
+        self.log('', LogType.SPACE)
         sender = self.sender()
         self.sendDocs = SendDocs(form=self, button=self.sender(
         ), rnp=rnp, doc_type=sender.text(), isFromPuds=isFromPuds)
@@ -278,14 +287,14 @@ class MainForm(QtWidgets.QMainWindow):
 
     def check_dirs(self):
         """Проверка директорий на наличие файлов"""
-        self.log('', LogType.INFO)
+        self.log('', LogType.SPACE)
         self.check_dirs = CheckDirs(form=self, doc_types=doc_types)
         self.check_dirs.log_str.connect(self.log)
         self.check_dirs.start()
 
     def epd_day2_start(self):
         """ЭПД дневное"""
-        self.log('', LogType.INFO)
+        self.log('', LogType.SPACE)
         self.day_thread = EpdDay(form=self)
         self.day_thread.log_str.connect(self.log)
         self.day_thread.confir_message.connect(self.accept_form)

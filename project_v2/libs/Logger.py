@@ -13,10 +13,10 @@ from libs.LogType import LogType
 class Logger(QtCore.QObject):
 
     def __init__(self, file_log_path=None, form_log_path=None):
-        fe = FileExplorer()
+        self.fe = FileExplorer()
 
-        fe.check_dir(file_log_path + "\\1\\" +
-                     datetime.now().strftime("%Y%m%d") + "\\")
+        self.fe.check_dir(file_log_path + "\\1\\" +
+                          datetime.now().strftime("%Y%m%d") + "\\")
 
         if form_log_path is not None:
             self.form_log = form_log_path
@@ -25,11 +25,13 @@ class Logger(QtCore.QObject):
         self.prev_day = datetime.now().day
 
         if self.file_log_path != None:
-            self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
+            self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(
+                self.file_log_path, datetime.now().strftime("%Y%m%d")))
 
-            self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
+            self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(
+                self.file_log_path, datetime.now().strftime("%Y%m%d")))
 
-    def setup_logger(self,name, log_file, level=logging.INFO):
+    def setup_logger(self, name, log_file, level=logging.INFO):
         """To setup as many loggers as you want"""
 
         handler = logging.FileHandler(log_file)
@@ -45,9 +47,15 @@ class Logger(QtCore.QObject):
         current_datetime_mls = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
         if self.prev_day != datetime.now().day:
+            print("Селф день {}, день сейчас {}".format(
+                self.prev_day, datetime.now().day))
             if self.file_log_path != None:
-                self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
-                self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(self.file_log_path,datetime.now().strftime("%Y%m%d")))
+                self.fe.check_dir(self.file_log_path + "\\1\\" +
+                                  datetime.now().strftime("%Y%m%d") + "\\")
+                self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(
+                    self.file_log_path, datetime.now().strftime("%Y%m%d")))
+                self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(
+                    self.file_log_path, datetime.now().strftime("%Y%m%d")))
                 self.prev_day = datetime.now().day
 
         if log_type == LogType.DEBUG:
@@ -65,7 +73,7 @@ class Logger(QtCore.QObject):
                 self.back.info("FILES|{}|{}".format(
                     current_datetime_mls, message))
                 self.visual.info("FILES|{}|{}".format(
-                current_datetime_mls, message))
+                    current_datetime_mls, message))
 
         elif log_type == LogType.INFO:
             if message == "" or message == " ":
@@ -77,8 +85,10 @@ class Logger(QtCore.QObject):
                     )
                 )
             if self.file_log_path is not None:
-                self.visual.info("INFO|{}|{}".format(current_datetime_mls, message))
-                self.back.info("INFO|{}|{}".format(current_datetime_mls, message))
+                self.visual.info("INFO|{}|{}".format(
+                    current_datetime_mls, message))
+                self.back.info("INFO|{}|{}".format(
+                    current_datetime_mls, message))
 
         elif log_type == LogType.ERROR:
             if message == "" or message == " ":
@@ -111,6 +121,15 @@ class Logger(QtCore.QObject):
                     current_datetime_mls, message))
                 self.visual.warning("WARNING|{}|{}".format(
                     current_datetime_mls, message))
+
+        elif log_type == LogType.SPACE:
+            if message == "" or message == " ":
+                self.form_log.append("")
+
+            if self.file_log_path is not None:
+                self.visual.info("SPACE|{}|{}".format(
+                    current_datetime_mls, message))
+
 
 class CheckConnection(Thread):
     def __init__(self, log_path, _logger):
@@ -145,7 +164,7 @@ class CheckConnection(Thread):
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",filter='sample.log',
+                    + "\\", filter='sample.log',
                     name_of_doc='log'
                 )
                 fe.copy_files(
@@ -153,7 +172,7 @@ class CheckConnection(Thread):
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",filter='sample.log',
+                    + "\\", filter='sample.log',
                     name_of_doc='log'
                 )
 
@@ -164,7 +183,7 @@ class CheckConnection(Thread):
                     path_to=puds_disk
                     + "LOGS_FOR_SEND_MESSAGE\\"
                     + currentDate.strftime("%Y%m%d")
-                    + "\\",filter='sample.log',
+                    + "\\", filter='sample.log',
                     name_of_doc='log'
                 )
 

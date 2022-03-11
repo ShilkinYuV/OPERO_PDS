@@ -1,0 +1,1 @@
+pyinstaller --noconfirm --onefile --windowed --icon "D:/projects/OPERO_PDS/project_v2/icon/bank.ico" --name "ARM KBRN Manager" --add-data "D:/projects/OPERO_PDS/project_v2/icon;icon/"  "D:/projects/OPERO_PDS/project_v2/main.py"

@@ -26,8 +26,8 @@ class NightCicle(QThread):
     def __init__(self,form):
         QThread.__init__(self)
         self.work = True
-        self.file_explorer = FileExplorer()
-        self.file_explorer.log_str.connect(form.log)
+        self.fe = FileExplorer()
+        self.fe.log_str.connect(form.log)
 
     def run(self):
         while self.work:
@@ -36,36 +36,41 @@ class NightCicle(QThread):
             time_from = datetime.time(datetime.strptime("20:30:00","%H:%M:%S"))
             # C 20:30 до 9 00 
             if time_to < time_now and time_now > time_from:
-                self.file_explorer.check_dir(dir_log)
-                self.file_explorer.check_dir(dir_armkbr + "\\exg\\rcv")
+                self.log_str.emit('', LogType.SPACE)
+                self.fe.check_dir(dir_log)
+                self.fe.check_dir(dir_armkbr + "\\exg\\rcv")
 
                 current_date = datetime.now().strftime("%d.%m.%Y")
 
-                if self.file_explorer.count_files_in_folder(dir_armkbr + "\\exg\\rcv") == 0:
+                if self.fe.count_files_in_folder(dir_armkbr + "\\exg\\rcv") == 0:
                     self.log_str.emit("Нет файлов к отправке!", LogType.INFO)
 
                 else:
-                    self.file_explorer.check_dir(dir_archive)
-                    self.file_explorer.check_dir(arm_buf)
+                    self.fe.check_dir(dir_archive)
+                    self.fe.check_dir(arm_buf)
 
-                    err, count, docs = self.file_explorer.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
-                    if not err:
+                    err, count, docs = self.fe.move_confirms(dir_armkbr + "\\exg\\rcv", dir_armkbr + "\\exg\\rcv\\1") # Исключить квитки без расширения
+                    if not err and count!=0:
                         self.log_str.emit("Квитки успешно перемещены в архив в количестве {}".format(count), LogType.INFO)
                         # for doc in docs:
                         #     self.log_str.emit(doc, LogType.FILES)
+                    elif not err and count == 0:
+                        self.log_str.emit("Нет квитков для перемещения", LogType.INFO)
 
-                    err, count, docs = self.file_explorer.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
-                    if not err:
+                    err, count, docs = self.fe.move_files(dir_armkbr + "\\exg\\rcv", arm_buf)
+                    if not err and count != 0:
                         self.log_str.emit("Файлы успешно перемещены в буфер в кол-ве {}".format(count), LogType.INFO)
                         # for doc in docs:
                         #     self.log_str.emit(doc, LogType.FILES)
+                    elif not err and count ==0:
+                        self.log_str.emit("Нет файлов для перемещения в буфер", LogType.INFO)
 
 
-                    self.file_explorer.decode_files(unb64_rabis, arm_buf, dir_log)
+                    self.fe.decode_files(unb64_rabis, arm_buf, dir_log)
 
                     arc_dir = dir_archive + "\\" + current_date + "\\uarm3\\inc\\ed"
 
-                    self.file_explorer.check_dir(arc_dir)
+                    self.fe.check_dir(arc_dir)
 
 
                     arc_xml_count = 0
@@ -78,7 +83,7 @@ class NightCicle(QThread):
                     err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='xml')
                     if not err:
                         arc_xml_count+=count
-                        arc_doc_list+=doc
+                        arc_doc_list+=docs
 
                     if arc_xml_count != 0:
                         self.log_str.emit("xml успешно скопированы в архив в кол-ве {} в {}".format(arc_xml_count, arc_dir), LogType.INFO)
@@ -131,7 +136,7 @@ class NightCicle(QThread):
                         self.log_str.emit("Нет документов ed для перемещения на диск ПУДС.", LogType.INFO)
 
 
-                    self.file_explorer.delete_files(arm_buf, r".*\.xml$", name_of_doc='.xml')
+                    self.fe.delete_files(arm_buf, r".*\.xml$", name_of_doc='.xml')
 
                     err, count, docs = self.fe.copy_files(arm_buf, dir_armkbr + "\\exg\\rcv\\1")
                     if not err:
@@ -140,8 +145,8 @@ class NightCicle(QThread):
                             # for doc in docs:
                             #     self.log_str.emit(doc, LogType.FILES)
 
-                    self.file_explorer.delete_files(arm_buf)
+                    self.fe.delete_files(arm_buf)
 
-                self.sleep(3600)
+                self.sleep(4200)
             else:
-                self.sleep(3600)
+                self.sleep(4200)

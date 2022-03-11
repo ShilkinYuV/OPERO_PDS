@@ -92,8 +92,10 @@ class SendDocs(QThread):
     def send_docs(self, rnp, path_from, path_to):
 
         archive = path_from + "\\1"
+        povtornaya = path_from + "\\1_double"
         self.fe.check_dir(archive)
         self.fe.check_dir(path_to)
+        self.fe.check_dir(povtornaya)
 
         count = 0
         docs = []
@@ -119,7 +121,8 @@ class SendDocs(QThread):
                         self.log_str.emit("Документ {} уже присутствует на транспортном диске {}".format(
                             file_name, path_to), LogType.WARNING)
                 else:
-                    self.log_str.emit("Документ {} уже присутствует в архиве {}".format(
+                    self.log_str.emit("Документ {} уже присутствует в архиве {}, перемещаем в папку 1_double".format(
                         file_name, archive), LogType.WARNING)
+                    self.fe.move_files(path_from, povtornaya, filter=file_name.lower())
 
         return count, docs
