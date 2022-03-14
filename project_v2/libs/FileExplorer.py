@@ -165,6 +165,7 @@ class FileExplorer(QtCore.QObject):
         file_name_failed = []
         count = 0
         count_before = 0
+        alr_exists_count = 0
         # Копирование файлов
         for file_name in os.listdir(path=path_from):
             file_path = path_from + "\\" + file_name
@@ -183,6 +184,7 @@ class FileExplorer(QtCore.QObject):
                                 listdir.append(file_name)
                             else:
                                 self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
+                                alr_exists_count+=1
                                 file_name_failed.append(file_name)
 
                         except Exception as ex:
@@ -199,69 +201,39 @@ class FileExplorer(QtCore.QObject):
                         else:
                                 self.log("Файл {} уже пристутсвует в {}".format(file_name, path_to), log_type=LogType.WARNING)
                                 file_name_failed.append(file_name)
+                                alr_exists_count+=1
                     except:
                         self.log(message + ' file_name= {}\\{}'.format(path_from,
                                  file_name), log_type=LogType.ERROR)
                         file_name_failed.append(file_name)
 
         # Проверка, скопировались ли файлы
-        if default_check:
-            count, file_name_failed = self.check_move_or_copy_files(listdir, path_from, path_to)
+        if count == count_before:
+            self.log(
+                "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
+                    name_of_doc, len(listdir), path_from, path_to
+                ), log_type=LogType.DEBUG
+            )
+
+            return False, len(listdir), listdir
+
+        elif count is None:
+            self.log(
+                "Нет файлов [{}] для копирования из [{}] в [{}]".format(
+                    name_of_doc, path_from, path_to
+                ), log_type=LogType.DEBUG
+            )
         
-            if count == 0:
-                self.log(
-                    "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
-                        name_of_doc, len(listdir), path_from, path_to
-                    ), log_type=LogType.DEBUG
-                )
+            return False, 0, []
 
-                return False, len(listdir), listdir
+        elif count != count_before and count_before-count==alr_exists_count:
+            self.log(
+                "Из [{}] {} файлов [{}] переместились {}, {} уже присутствует в {} ".format(
+                    path_from ,count_before, name_of_doc, count, alr_exists_count, path_to
+                ), log_type=LogType.WARNING
+            )
 
-            elif count is None:
-                self.log(
-                    "Нет файлов [{}] для копирования из [{}] в [{}]".format(
-                        name_of_doc, path_from, path_to
-                    ), log_type=LogType.DEBUG
-                )
-            
-                return False, 0, []
-
-            else:
-                self.log(
-                    "Не удалось скопировать {} файлов [{}] из [{}] в [{}]".format(
-                        count, name_of_doc, path_from, path_to
-                    ), log_type=LogType.ERROR
-                )
-
-                return True, count, file_name_failed
-
-        else:
-            if count == count_before:
-                self.log(
-                    "Все файлы [{}] в количестве {} успешно скопированы из [{}] в [{}]".format(
-                        name_of_doc, len(listdir), path_from, path_to
-                    ), log_type=LogType.DEBUG
-                )
-
-                return False, len(listdir), listdir
-
-            elif count is None:
-                self.log(
-                    "Нет файлов [{}] для копирования из [{}] в [{}]".format(
-                        name_of_doc, path_from, path_to
-                    ), log_type=LogType.DEBUG
-                )
-            
-                return False, 0, []
-
-            else:
-                self.log(
-                    "Не удалось скопировать {} файлов [{}] из [{}] в [{}]".format(
-                        count, name_of_doc, path_from, path_to
-                    ), log_type=LogType.ERROR
-                )
-
-                return True, count, file_name_failed
+            return False, count, listdir
 
     def delete_files(self, path_from, filter=None, name_of_doc=''):
         """Удаление файлов из директории.
@@ -328,9 +300,10 @@ class FileExplorer(QtCore.QObject):
 
         count_after = self.count_files_in_folder(arm_buf)[0]
 
-        if count_before == count_after - count_before:
+        if count_before == 0:
+            self.log("Нет файлов для расшифровки", LogType.INFO)
+        elif count_before == count_after - count_before:
             self.log("Все файлы успешно расшифрованы - {}".format(count_before), log_type=LogType.INFO)
-
         else:
             undecode_count = count_before - (count_after - count_before)
             self.log(

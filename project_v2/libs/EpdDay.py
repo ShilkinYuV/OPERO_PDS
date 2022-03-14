@@ -91,7 +91,7 @@ class EpdDay(QThread):
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"01.*\.ed$",
-                name_of_doc='ed2114_01'
+                name_of_doc='ed2114_01.ed'
             )
 
             if not err:
@@ -102,7 +102,7 @@ class EpdDay(QThread):
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"02.*\.ed$",
-                name_of_doc='ed2114_02'
+                name_of_doc='ed2114_02.ed'
             )
 
             if not err:
@@ -113,7 +113,7 @@ class EpdDay(QThread):
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"03.*\.ed$",
-                name_of_doc='ed2114_03'
+                name_of_doc='ed2114_03.ed'
             )
 
             if not err:
@@ -124,14 +124,14 @@ class EpdDay(QThread):
                 rcv,
                 bvp,
                 filter=r".*4525000987000000000000ed2114" + str(dd) + r"04.*\.ed$",
-                name_of_doc='ed2114_04'
+                name_of_doc='ed2114_04.ed'
             )
 
             if not err:
                 count_ed211+=count
                 list_of_docs+=docs
 
-            err, count, docs = self.fe.move_files(rcv, bvp, filter=r".*ed211" + str(dd) + r".*\.eds$", name_of_doc='ed211')
+            err, count, docs = self.fe.move_files(rcv, bvp, filter=r".*ed211" + str(dd) + r".*\.eds$", name_of_doc='ed211.eds')
 
             if not err:
                 count_ed211+=count
@@ -179,7 +179,7 @@ class EpdDay(QThread):
                 arc_xml_count+=count
                 doc_xml_list+=docs
 
-            err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.ed\.xml$", name_of_doc='e211.ed.xml')
+            err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*ed211.*\.eds\.xml$", name_of_doc='e211.ed.xml')
             if not err:
                 arc_xml_count+=count
                 doc_xml_list+=docs
@@ -203,7 +203,7 @@ class EpdDay(QThread):
             if not err:
                 xml_to_trans_disk_count+=count
                 xml_to_trans_docs_list+=docs
-            err, count, docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.ed\.xml$", name_of_doc='ed211.xml', default_check=False)
+            err, count, docs = self.fe.copy_files(arm_buf, trans_disk_path, r".*ed211.*\.eds\.xml$", name_of_doc='ed211.xml', default_check=False)
             if not err:
                 xml_to_trans_disk_count+=count
                 xml_to_trans_docs_list+=docs

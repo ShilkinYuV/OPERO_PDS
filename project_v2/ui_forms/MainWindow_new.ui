@@ -162,6 +162,21 @@ QWidget{
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="pbutton_check_vpn">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="text">
+            <string>Проверить VPN</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="pbutton_show_about">
            <property name="font">
             <font>
