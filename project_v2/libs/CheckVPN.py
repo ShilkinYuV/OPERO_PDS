@@ -42,7 +42,7 @@ class CheckVPN(QThread):
             regular = re.compile(r"http:\/\/(?P<ip>.*)\:(?P<port>.*)\/get")
             self.fe.check_dir(self.settings_path)
             if os.path.exists(self.settings_path + 'arm.cfg') == False:
-                self.log_str.emit("Не могу найти arm.cfg для теста VPN", LogType.INFO)
+                self.log_str.emit("Не могу найти arm.cfg для теста VPN", LogType.ERROR)
             if os.path.isfile(self.settings_path + 'arm.cfg'):
                 mydoc = minidom.parse(self.settings_path + 'arm.cfg')
                 items = mydoc.getElementsByTagName("svk-httpServerFrom")

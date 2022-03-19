@@ -95,7 +95,6 @@ class SendDocs(QThread):
         povtornaya = path_from + "\\1_double"
         self.fe.check_dir(archive)
         self.fe.check_dir(path_to)
-        self.fe.check_dir(povtornaya)
 
         count = 0
         docs = []
@@ -123,6 +122,7 @@ class SendDocs(QThread):
                 else:
                     self.log_str.emit("Документ {} уже присутствует в архиве {}, перемещаем в папку 1_double".format(
                         file_name, archive), LogType.WARNING)
+                    self.fe.check_dir(povtornaya)
                     self.fe.move_files(path_from, povtornaya, filter=file_name.lower())
 
         return count, docs

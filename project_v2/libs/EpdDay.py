@@ -174,7 +174,7 @@ class EpdDay(QThread):
             
             arc_xml_count = 0
             doc_xml_list = []
-            err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='xml')
+            err, count, docs = self.fe.copy_files(arm_buf, arc_dir, r".*\.ed\.xml$", name_of_doc='ed.xml')
             if not err:
                 arc_xml_count+=count
                 doc_xml_list+=docs
@@ -220,7 +220,7 @@ class EpdDay(QThread):
 
 
 
-            err, count,docs = self.fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml$", name_of_doc='ed808.xml')
+            err, count,docs = self.fe.copy_files(arm_buf, rash, r".*ed808.*\.eds\.xml$", name_of_doc='ed808.eds.xml')
             if not err:
                 if count!=0:
                     self.log_str.emit("ed808 успешно скопированы в кол-ве {} в {}".format(count, rash), LogType.INFO)
