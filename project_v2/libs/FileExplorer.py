@@ -291,6 +291,10 @@ class FileExplorer(QtCore.QObject):
     def decode_files(self, decoder, arm_buf, dir_log):
         """Расшифровка файлов по указанному пути, с проверкой"""
         count_before = self.count_files_in_folder(arm_buf)[0]
+        files_before = []
+        for file_name in os.listdir(arm_buf):
+            if os.path.isfile(arm_buf + '\\' + file_name):
+                files_before.append(file_name)
 
         os.system(
             "{decoder} *.* {buffer}\ {buffer}\ >> {logs}\decod.log".format(
@@ -299,11 +303,24 @@ class FileExplorer(QtCore.QObject):
         )
 
         count_after = self.count_files_in_folder(arm_buf)[0]
+        decode_files = []
+        for file_name in os.listdir(arm_buf):
+            if os.path.isfile(arm_buf + '\\' + file_name):
+                flag = False
+                for file in files_before:
+                    if file == file_name:
+                        flag = True
+                
+                if flag is False:
+                    decode_files.append(file_name)
+
 
         if count_before == 0:
             self.log("Нет файлов для расшифровки", LogType.INFO)
         elif count_before == count_after - count_before:
             self.log("Все файлы успешно расшифрованы - {}".format(count_before), log_type=LogType.INFO)
+            for file in decode_files:
+                self.log(file, log_type=LogType.DEBUG)
         else:
             undecode_count = count_before - (count_after - count_before)
             self.log(

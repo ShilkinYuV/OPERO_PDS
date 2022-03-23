@@ -47,8 +47,10 @@ class NightCicle(QThread):
             time_now = datetime.time(datetime.now())
             time_to = datetime.time(datetime.strptime("09:00:00","%H:%M:%S"))
             time_from = datetime.time(datetime.strptime("20:30:00","%H:%M:%S"))
+            time_between_1 = datetime.time(datetime.strptime("23:59:59","%H:%M:%S"))
+            time_between_2 = datetime.time(datetime.strptime("00:00:00","%H:%M:%S"))
             # C 20:30 до 9 00 
-            if time_to < time_now and time_now > time_from:
+            if time_now >= time_from and time_now <= time_between_1 or time_now >= time_between_2 and time_now <= time_to:
                 self.mapping_network_drives()
                 self.log_str.emit('', LogType.SPACE)
                 self.fe.check_dir(dir_log)

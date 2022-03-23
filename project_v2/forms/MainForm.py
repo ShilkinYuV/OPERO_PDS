@@ -14,6 +14,7 @@ from libs.LogType import LogType
 from libs.CheckVPN import CheckVPN
 from libs.PasswordNotify import PasswordNotify
 from libs.DiskSpaceChecker import DiskSpaceChecker
+from libs.Viverka import Viverka
 
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
@@ -50,6 +51,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
         self.ui.lbl_password_days.clicked.connect(self.reset_password_days)
         self.ui.pbutton_check_vpn.clicked.connect(self.hanlde_check_vpn)
+        self.ui.pbutton_viverka.clicked.connect(self.do_viverka)
         self.ui.OTVSEND.clicked.connect(
             lambda: self.send_docs(doc_types["OTVSEND"], False))
         self.ui.RNPSEND.clicked.connect(
@@ -93,6 +95,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.night_thread = None
         self.check_vpn = None
+        self.viverka = None
         
         self.check_connection()
         self.read_local_log()
@@ -104,6 +107,13 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.password_notify_start()
         self.disk_space_checker_start()
+
+    def do_viverka(self):
+        self.ui.pbutton_viverka.setDisabled(True)
+        self.viverka = Viverka(self.ui.pbutton_viverka)
+        self.viverka.log_str.connect(self.log)
+        self.viverka.start()
+
 
     def load_settings(self):
         if self.settings.value('count_output') is not None:

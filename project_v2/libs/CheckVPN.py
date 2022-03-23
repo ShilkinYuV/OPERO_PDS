@@ -61,7 +61,7 @@ class CheckVPN(QThread):
                 work = False
                 self.form.ui.pbutton_check_vpn.setDisabled(False)
             else:
-                sleep(4200)
+                sleep(600)
 
     def ping(self, host):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

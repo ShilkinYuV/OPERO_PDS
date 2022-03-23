@@ -48,6 +48,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.addWidget(self.label)
         self.horizontalLayout_2.addWidget(self.frame)
         self.widget_2 = QtWidgets.QWidget(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.widget_2.setFont(font)
+        self.widget_2.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.widget_2.setStyleSheet(".QPushButton {\n"
 "color: white;\n"
 "border: none;\n"
@@ -92,6 +96,12 @@ class Ui_MainWindow(object):
         self.pbutton_check_vpn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.pbutton_check_vpn.setObjectName("pbutton_check_vpn")
         self.horizontalLayout.addWidget(self.pbutton_check_vpn)
+        self.pbutton_viverka = QtWidgets.QPushButton(self.widget_2)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pbutton_viverka.setFont(font)
+        self.pbutton_viverka.setObjectName("pbutton_viverka")
+        self.horizontalLayout.addWidget(self.pbutton_viverka)
         self.pbutton_show_about = QtWidgets.QPushButton(self.widget_2)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -376,6 +386,7 @@ class Ui_MainWindow(object):
         self.pbutton_settings.setText(_translate("MainWindow", "Настройки"))
         self.pbutton_load_log.setText(_translate("MainWindow", "Загрузить лог"))
         self.pbutton_check_vpn.setText(_translate("MainWindow", "Проверить VPN"))
+        self.pbutton_viverka.setText(_translate("MainWindow", "Выверка"))
         self.pbutton_show_about.setText(_translate("MainWindow", "О программе"))
         self.chekDocuments.setText(_translate("MainWindow", "Проверить документы"))
         self.label_2.setText(_translate("MainWindow", "АСФК"))
