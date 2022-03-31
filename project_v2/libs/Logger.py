@@ -25,10 +25,10 @@ class Logger(QtCore.QObject):
         self.prev_day = datetime.now().day
 
         if self.file_log_path != None:
-            self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(
+            self.visual = self.setup_logger(name="visuallogger" + datetime.now().strftime("%Y%m%d"), log_file="{}\\1\\{}\\visual.log".format(
                 self.file_log_path, datetime.now().strftime("%Y%m%d")))
 
-            self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(
+            self.back = self.setup_logger(name="backlogger"+ datetime.now().strftime("%Y%m%d"), log_file="{}\\1\\{}\\sample.log".format(
                 self.file_log_path, datetime.now().strftime("%Y%m%d")))
 
     def setup_logger(self, name, log_file, level=logging.INFO):
@@ -52,9 +52,9 @@ class Logger(QtCore.QObject):
             if self.file_log_path != None:
                 self.fe.check_dir(self.file_log_path + "\\1\\" +
                                   datetime.now().strftime("%Y%m%d") + "\\")
-                self.visual = self.setup_logger(name="visuallogger", log_file="{}\\1\\{}\\visual.log".format(
+                self.visual = self.setup_logger(name="visuallogger" + datetime.now().strftime("%Y%m%d"), log_file="{}\\1\\{}\\visual.log".format(
                     self.file_log_path, datetime.now().strftime("%Y%m%d")))
-                self.back = self.setup_logger("backlogger", "{}\\1\\{}\\sample.log".format(
+                self.back = self.setup_logger(name="backlogger"+ datetime.now().strftime("%Y%m%d"), log_file= "{}\\1\\{}\\sample.log".format(
                     self.file_log_path, datetime.now().strftime("%Y%m%d")))
                 self.prev_day = datetime.now().day
 

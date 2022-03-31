@@ -95,6 +95,14 @@ color: white;
       </item>
       <item>
        <widget class="QWidget" name="widget_2" native="true">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
         <property name="styleSheet">
          <string notr="true">.QPushButton {
 color: white;
@@ -173,6 +181,18 @@ QWidget{
            </property>
            <property name="text">
             <string>Проверить VPN</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbutton_viverka">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Выверка</string>
            </property>
           </widget>
          </item>

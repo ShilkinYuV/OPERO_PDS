@@ -17,3 +17,4 @@ puds_disk = "w:\\"
 
 vpn_settgins_folder = dir_armkbr + '\\Cfg\\'
 
+arm_kbrn_logs = dir_armkbr + "\\Log"

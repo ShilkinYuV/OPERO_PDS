@@ -1,7 +1,7 @@
 from datetime import datetime
 from PyQt5.QtCore import QThread
 from PyQt5 import QtCore
-# import time
+import os
 
 from contants.path_constants import (
     dir_log,
@@ -29,13 +29,29 @@ class NightCicle(QThread):
         self.fe = FileExplorer()
         self.fe.log_str.connect(form.log)
 
+    def mapping_network_drives(self):
+        os.system("set trans_disk=x:")
+        os.system("set puds_disk=w:")
+        os.system("net use %trans_disk% /delete /y")
+        os.system("net use %puds_disk% /delete /y")
+        os.system(
+            "net use x: \\\\10.48.4.241\\transportbanks 1!QQww /USER:10.48.4.241\\svc95004800"
+        )
+        os.system(
+            "net use w: \\\\10.48.4.241\\transport 1!QQww /USER:10.48.4.241\\svc95004800"
+        )
+
     def run(self):
         while self.work:
+            
             time_now = datetime.time(datetime.now())
             time_to = datetime.time(datetime.strptime("09:00:00","%H:%M:%S"))
             time_from = datetime.time(datetime.strptime("20:30:00","%H:%M:%S"))
+            time_between_1 = datetime.time(datetime.strptime("23:59:59","%H:%M:%S"))
+            time_between_2 = datetime.time(datetime.strptime("00:00:00","%H:%M:%S"))
             # C 20:30 до 9 00 
-            if time_to < time_now and time_now > time_from:
+            if time_now >= time_from and time_now <= time_between_1 or time_now >= time_between_2 and time_now <= time_to:
+                self.mapping_network_drives()
                 self.log_str.emit('', LogType.SPACE)
                 self.fe.check_dir(dir_log)
                 self.fe.check_dir(dir_armkbr + "\\exg\\rcv")
@@ -147,6 +163,6 @@ class NightCicle(QThread):
 
                     self.fe.delete_files(arm_buf)
 
-                self.sleep(4200)
+                self.sleep(2400)
             else:
-                self.sleep(4200)
+                self.sleep(600)
