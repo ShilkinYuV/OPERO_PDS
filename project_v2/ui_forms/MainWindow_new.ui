@@ -185,6 +185,18 @@ QWidget{
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="pbutton_make_archive">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Архивация</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="pbutton_viverka">
            <property name="font">
             <font>
