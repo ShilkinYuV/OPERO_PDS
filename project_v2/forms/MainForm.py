@@ -51,7 +51,11 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.night.clicked.connect(self.epd_night)
         self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
         self.ui.lbl_password_days.clicked.connect(self.reset_password_days)
+
         self.ui.pbutton_check_vpn.clicked.connect(self.hanlde_check_vpn)
+        self.ui.pbutton_check_vpn.setDisabled(True)
+        self.ui.pbutton_check_vpn.setVisible(False)
+        
         self.ui.pbutton_viverka.clicked.connect(self.do_viverka)
         self.ui.pbutton_make_archive.clicked.connect(self.make_archive)
         self.ui.OTVSEND.clicked.connect(
@@ -104,7 +108,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.check_connection()
         self.read_local_log()
         self.epd_night()
-        self.start_check_vpn()
+        # self.start_check_vpn()
 
         self.load_settings()
         
