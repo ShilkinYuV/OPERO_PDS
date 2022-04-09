@@ -15,6 +15,7 @@ from libs.CheckVPN import CheckVPN
 from libs.PasswordNotify import PasswordNotify
 from libs.DiskSpaceChecker import DiskSpaceChecker
 from libs.Viverka import Viverka
+from libs.MakeArchive import MakeArchive
 
 from ui_forms.MainWindow import Ui_MainWindow
 from forms.AboutForm import AboutForm
@@ -50,8 +51,13 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui.night.clicked.connect(self.epd_night)
         self.ui.clearWindow.clicked.connect(self.ui.textEdit.clear)
         self.ui.lbl_password_days.clicked.connect(self.reset_password_days)
+
         self.ui.pbutton_check_vpn.clicked.connect(self.hanlde_check_vpn)
+        self.ui.pbutton_check_vpn.setDisabled(True)
+        self.ui.pbutton_check_vpn.setVisible(False)
+        
         self.ui.pbutton_viverka.clicked.connect(self.do_viverka)
+        self.ui.pbutton_make_archive.clicked.connect(self.make_archive)
         self.ui.OTVSEND.clicked.connect(
             lambda: self.send_docs(doc_types["OTVSEND"], False))
         self.ui.RNPSEND.clicked.connect(
@@ -94,13 +100,15 @@ class MainForm(QtWidgets.QMainWindow):
                              form_log_path=self.ui.textEdit)
 
         self.night_thread = None
-        self.check_vpn = None
-        self.viverka = None
+        self.check_vpn_thread = None
+        self.viverka_thread = None
+        self.make_archive_thread = None
+        self.handle_check_vpn_thread = None
         
         self.check_connection()
         self.read_local_log()
         self.epd_night()
-        self.start_check_vpn()
+        # self.start_check_vpn()
 
         self.load_settings()
         
@@ -108,11 +116,17 @@ class MainForm(QtWidgets.QMainWindow):
         self.password_notify_start()
         self.disk_space_checker_start()
 
+    def make_archive(self):
+        self.ui.pbutton_make_archive.setDisabled(True)
+        self.make_archive_thread = MakeArchive(self.ui.pbutton_make_archive, self)
+        self.make_archive_thread.start()
+
+
     def do_viverka(self):
         self.ui.pbutton_viverka.setDisabled(True)
-        self.viverka = Viverka(self.ui.pbutton_viverka)
-        self.viverka.log_str.connect(self.log)
-        self.viverka.start()
+        self.viverka_thread = Viverka(self.ui.pbutton_viverka)
+        self.viverka_thread.log_str.connect(self.log)
+        self.viverka_thread.start()
 
 
     def load_settings(self):
@@ -158,9 +172,9 @@ class MainForm(QtWidgets.QMainWindow):
 
     def hanlde_check_vpn(self):
         self.ui.pbutton_check_vpn.setDisabled(True)
-        self.handle_check_vpn = CheckVPN(self, settings_path=vpn_settgins_folder, handle_check=True)
-        self.handle_check_vpn.log_str.connect(self.log)
-        self.handle_check_vpn.start()
+        self.handle_check_vpn_thread = CheckVPN(self, settings_path=vpn_settgins_folder, handle_check=True)
+        self.handle_check_vpn_thread.log_str.connect(self.log)
+        self.handle_check_vpn_thread.start()
 
     def reset_password_days(self):
         """Сброс счетчика дней до смены пароля"""
@@ -386,12 +400,12 @@ class MainForm(QtWidgets.QMainWindow):
             self.day_thread.confirm = False
 
     def start_check_vpn(self):
-        self.check_vpn = CheckVPN(self, settings_path=vpn_settgins_folder)
-        self.check_vpn.log_str.connect(self.log)
-        self.check_vpn.start()
+        self.check_vpn_thread = CheckVPN(self, settings_path=vpn_settgins_folder)
+        self.check_vpn_thread.log_str.connect(self.log)
+        self.check_vpn_thread.start()
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.night_thread is not None:
             self.night_thread.quit()
-        if self.check_vpn is not None:
-            self.check_vpn.quit()
+        if self.check_vpn_thread is not None:
+            self.check_vpn_thread.quit()
